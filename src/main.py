@@ -145,7 +145,7 @@ PASS_AT_K = args.pass_at_k
 LANGUAGE = args.language
 CONTINUE = args.cont
 RESULT_LOG_MODE = args.result_log
-VERBOSE = args.verbose
+VERBOSE = int(args.verbose)
 STORE_LOG_IN_FILE = args.store_log_in_file
 
 RUN_NAME = f"results/{DATASET}/{STRATEGY}/{MODEL_NAME}/{LANGUAGE}-{TEMPERATURE}-{TOP_P}-{PASS_AT_K}"

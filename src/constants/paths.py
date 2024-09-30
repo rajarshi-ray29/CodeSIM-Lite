@@ -9,7 +9,7 @@ HUMAN_DATA_DIR = join(
 
 HUMAN_DATA_PATH = join(
     HUMAN_DATA_DIR,
-    "HumanEvalHard.jsonl"
+    "HumanEval.jsonl"
 )
 
 HUMAN_WST_DATA_PATH = join(
