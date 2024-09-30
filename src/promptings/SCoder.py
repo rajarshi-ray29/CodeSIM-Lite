@@ -553,7 +553,13 @@ Your response should be structured as follows:
 
 ### Debugging Notes
 
-[Write any discrepancies or deviations from the plan in code generation.]
+[Write any discrepancies or deviations from the plan in code generation.]---
+
+**Important:**
+
+- **Strictly follow the instructions.**
+- Do not generate code.
+- Give guideline to debug the code.
 """
 
 
