@@ -1,0 +1,133 @@
+from typing import List
+import tiktoken
+import os
+import copy
+import time
+
+from models.Base import BaseModel
+from datasets.Dataset import Dataset
+from results.Results import Results
+from utils.parse import parse_response
+from time import perf_counter_ns
+
+class BaseStrategy(object):
+    def __init__(
+        self,
+        model: BaseModel,
+        data: Dataset,
+        language: str,
+        pass_at_k: int,
+        results: Results,
+        verbose: bool = True,
+    ):
+        self.model = model
+        self.data = data
+        self.pass_at_k = pass_at_k
+        self.results = results
+        self.language = language
+        self.verbose = verbose
+        self.run_details = []
+    
+
+    def append_run_details(self, run_details: dict):
+        for key in run_details.keys():
+            if key in self.run_details:
+                self.run_details[key] += run_details[key]
+            else:
+                self.run_details[key] = run_details[key]
+
+
+    def gpt_chat(
+            self, 
+            processed_input: List[dict], 
+            frequency_penalty=0, 
+            presence_penalty=0
+        ):
+        
+        response, run_details = self.model.prompt(
+            processed_input=processed_input, 
+            frequency_penalty=frequency_penalty, 
+            presence_penalty=presence_penalty
+        )
+        self.append_run_details(run_details)
+        
+        return response
+
+
+    def run_single_pass(self, data_row: dict):
+        pass
+
+    def run(self):
+        num_items = len(self.data)
+        num_success = 0
+
+        for i, data_row in enumerate(self.data):
+            print("", flush=True, end="")
+
+            if i < len(self.results) and data_row[self.data.id_key] == self.results[i]["task_id"]:
+                item = copy.deepcopy(self.results[i])
+                cur_pass = len(item["source_codes"])
+                is_solved = item["is_solved"]
+                cur_imp = item["source_codes"][-1]
+            else:
+                item = {
+                    self.data.id_key: data_row[self.data.id_key],
+                    "task_id": item[self.data.id_key],
+                    "language": self.language,
+                    "source_codes": [],
+                    "run_details": [],
+                    "no_of_try": 0,
+                }
+
+                cur_pass = 0
+                is_solved = False
+                cur_imp = ""
+
+            while cur_pass < self.pass_at_k and not is_solved:
+                # initialize it for each run
+                self.run_details = []
+                # for _ in range(10):
+                #     try:
+                response = self.run_single_pass(data_row)
+                #     break
+                # except Exception as e:
+                #     time.sleep(5)
+                #     pass
+
+                cur_imp = parse_response(response)
+
+                item["source_codes"].append(cur_imp)
+                item["run_details"].append(self.run_details)
+                
+                item["no_of_try"] += 1
+
+                is_solved = self.data.evaluate(
+                    item=data_row,
+                    cur_imp=cur_imp,
+                    language=self.language
+                )
+
+                cur_pass += 1
+            
+            if is_solved:
+                num_success += 1
+
+            item["is_solved"] = is_solved
+
+            if i < len(self.results):
+                if item["task_id"] == self.results[i]["task_id"]:
+                    self.results.results[i] = item
+                else:
+                    self.results.get_results().insert(i, item)
+                    self.results.save_results()
+            else:
+                self.results.add_result(item)
+
+            if self.verbose:
+                print(
+                    f'completed {i+1}/{num_items}, Solved: {self.results[i]["is_solved"]}, number of success = {num_success}/{i+1}, acc = {round(num_success/(i+1)*100, 2)}')
+            
+            self.results.save_results()
+
+            print("", flush=True, end="")
+
