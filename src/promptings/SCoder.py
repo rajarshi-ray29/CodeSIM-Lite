@@ -22,25 +22,30 @@ from datasets.CodeContestDataset import CodeContestDataset
 
 from evaluations.func_evaluate import evaluate_io
 
-
 from utils.parse import parse_response
-
+from utils.verboseType import *
 
 class SCoder(DirectStrategy):
     def __init__(
         self,
-        k=3,
-        d=5,
+        additional_info_run=2,
+        max_plan_try=3,
+        max_debug_try=5,
         *args,
         **kwargs
     ):
         super().__init__(*args, **kwargs)
-        self.k = k
-        self.d = d
 
-        print("\n\n" + "_" * 70)
-        print(f"Running SCoder with k={self.k}, d={self.d}")
-        print("\n", flush=True)
+        
+        self.additional_info_run=additional_info_run
+        self.max_plan_try=max_plan_try
+        self.max_debug_try=max_debug_try
+
+
+        if self.verbose >= VERBOSE_FULL:
+            print("\n\n" + "_" * 70)
+            print(f"Running SCoder with additional_info_run={additional_info_run}, max_plan_try={max_plan_try}, max_debug_try={max_debug_try}")
+            print("\n", flush=True)
 
 
     @staticmethod
@@ -76,12 +81,12 @@ class SCoder(DirectStrategy):
 
     def check(
             self,
-            item: dict,
+            data_row: dict,
             additional_io: List[str],
             code: str
     ) -> bool:
         passed_sample, test_log_sample = self.data.evaluate_sample_io(
-            item,
+            data_row,
             code,
             self.language
         )
@@ -108,7 +113,7 @@ class SCoder(DirectStrategy):
         return f"Passed Test Cases:\n{"\n".join(passed_test_cases)}\n\nFailed Test Cases:\n{"\n".join(falied_test_cases)}"
 
 
-    def run_single_pass(self, item: dict):
+    def run_single_pass(self, data_row: dict):
         print("", flush=True)
 
         std_input_prompt = ""
@@ -118,56 +123,67 @@ class SCoder(DirectStrategy):
             type(self.data) == XCodeDataset:
             std_input_prompt = "- Strictly follow the input and output format. The input should be taken from Standard input and output should be given to standard output. If you are writing a function then after the function definition take input using `input()` function then call the function with specified parameters and finally print the output of the function. Do not add extra print statement otherwise it will failed the test cases."
 
-        problem = self.data.get_prompt(item)
+        problem = self.data.get_prompt(data_row)
 
-        item['api_calls'] = 0
-        pr_tok = 0
-        com_tok = 0
+        additional_io = None
 
-        # Additional IO
-        additional_io_generation_input = [
-            {
-                "role": "user",
-                "content": prompt_for_additional_io.format(
-                    problem=problem
-                ),
-            },
-        ]
+        # Additional IO collection
+        for idx in range(1, self.additional_info_run + 1):
+            # Additional IO
+            additional_io_generation_input = [
+                {
+                    "role": "user",
+                    "content": prompt_for_additional_io.format(
+                        problem=problem
+                    ),
+                },
+            ]
 
-        print("\n\n" + "_" * 70)
-        print(f"Input for Additional IO Generation: ")
-        print(additional_io_generation_input[0]['content'], flush=True)
+            if self.verbose >= VERBOSE_FULL:
+                print("\n\n" + "_" * 70)
+                print(f"Input for Additional IO Generation: {idx}")
+                print(additional_io_generation_input[0]['content'], flush=True)
 
-        response, pr_tok_1, com_tok_1 = self.gpt_chat(
-            processed_input=additional_io_generation_input,
-            frequency_penalty=0.2
-        )
-        item['api_calls'] += 1
-        pr_tok += pr_tok_1
-        com_tok += com_tok_1
+            response = self.gpt_chat(
+                processed_input=additional_io_generation_input,
+                frequency_penalty=0.2
+            )
 
-        print("\n\n" + "_" * 70)
-        print(f"Response from Additional IO Generation:")
-        print(response, flush=True)
+            if self.verbose >= VERBOSE_FULL:
+                print("\n\n" + "_" * 70)
+                print(f"Response from Additional IO Generation: {idx}")
+                print(response, flush=True)
 
-        additional_io_response = parse_response(response)
+            additional_io_response = parse_response(response)
 
-        additional_io = self.parse_test_cases(
-            test_cases=additional_io_response
-        )
+            # Applying intersection for self-consistancy
+            if additional_io is None:
+                additional_io = set(self.parse_test_cases(
+                    test_cases=additional_io_response
+                ))
+            else:
+                additional_io_ = self.parse_test_cases(
+                    test_cases=additional_io_response
+                )
+                additional_io = additional_io.intersection(set(additional_io_))
 
-        print(f"Additional IOs:")
-        print(additional_io, flush=True)
+        additional_io = list(additional_io)
+        if self.verbose >= VERBOSE_FULL:
+            print(f"Additional IOs:")
+            print(additional_io, flush=True)
+
+        self.run_details["additional_io"] = additional_io
 
         # Check whether the additional IO is correct or not
+        # This block is just for keeping track off the correctness of additional IO
         if type(self.data) == HumanDataset:
-            passed, _ = evaluate_io(additional_io, f"{item["prompt"]}\n\n{item["canonical_solution"]}")
-            item["additional_io_correctness"] = passed
-            if not passed:
+            passed, _ = evaluate_io(additional_io, f"{data_row["prompt"]}\n\n{data_row["canonical_solution"]}")
+            self.run_details["additional_io_correctness"] = passed
+            if not passed and self.verbose >= VERBOSE_FULL:
                 print("Problem in additional IO")
 
         # # Forcing no sample io 
-        # self.item['sample_io'] = []
+        # self.data_row['sample_io'] = []
         # else:
         #     additional_io = []
 
@@ -182,35 +198,30 @@ class SCoder(DirectStrategy):
             },
         ]
 
-        print("\n\n" + "_" * 70)
-        print(f"Input for Code Generation: ")
-        print(code_generation_input[0]['content'], flush=True)
+        if self.verbose >= VERBOSE_FULL:
+            print("\n\n" + "_" * 70)
+            print(f"Input for Code Generation: ")
+            print(code_generation_input[0]['content'], flush=True)
 
-        response, pr_tok_1, com_tok_1 = self.gpt_chat(
+        response = self.gpt_chat(
             processed_input=code_generation_input
         )
 
-        item['api_calls'] += 1
-        pr_tok += pr_tok_1
-        com_tok += com_tok_1
-
-        print("\n\n" + "_" * 70)
-        print(f"Response from Code Generation:")
-        print(response, flush=True)
+        if self.verbose >= VERBOSE_FULL:
+            print("\n\n" + "_" * 70)
+            print(f"Response from Code Generation:")
+            print(response, flush=True)
 
         code = parse_response(response)
 
-        passed, test_log = self.check(item, additional_io, code)
+        passed, test_log = self.check(data_row, additional_io, code)
 
         # Early closing for easily solvable problems so that no extra token consumption
         if passed:
-            return code, pr_tok, com_tok
-
-        # For first pass no summary
-        summary = ''
+            return code
 
         # Planning, Coding, Debugging
-        for plan_no in range(1, self.k+1):
+        for plan_no in range(1, self.max_plan_try + 1):
             # Planning Phase
             input_for_planning = [
                 {
@@ -222,21 +233,19 @@ class SCoder(DirectStrategy):
                 },
             ]
 
-            print("\n\n" + "_" * 70)
-            print(f"Input for Planning: {plan_no}\n\n")
-            print(input_for_planning[0]['content'], flush=True)
+            if self.verbose >= VERBOSE_FULL:
+                print("\n\n" + "_" * 70)
+                print(f"Input for Planning: {plan_no}\n\n")
+                print(input_for_planning[0]['content'], flush=True)
 
-            response, pr_tok_1, com_tok_1 = self.gpt_chat(
+            response = self.gpt_chat(
                 processed_input=input_for_planning
             )
 
-            item['api_calls'] += 1
-            pr_tok += pr_tok_1
-            com_tok += com_tok_1
-
-            print("\n\n" + "_" * 70)
-            print(f"Response from Planning: {plan_no}\n\n")
-            print(response, flush=True)
+            if self.verbose >= VERBOSE_FULL:
+                print("\n\n" + "_" * 70)
+                print(f"Response from Planning: {plan_no}\n\n")
+                print(response, flush=True)
             
             # if "```" in response:
             #     plan = parse_response(response)
@@ -248,40 +257,7 @@ class SCoder(DirectStrategy):
             else:
                 plan = response[response.find("### Plan"):]
 
-            problem_with_planning = f"# Problem:\n{problem}\n\n{plan}"
-            
-
-            # Simulation Phase
-            input_for_simulation = [
-                {
-                    "role": "user",
-                    "content": prompt_for_simulation.format(
-                        problem_with_planning=problem_with_planning,
-                        language=self.language,
-                    )
-                },
-            ]
-
-            print("\n\n" + "_" * 70)
-            print(f"Input for Simulation: {plan_no}\n\n")
-            print(input_for_simulation[0]['content'], flush=True)
-
-            response, pr_tok_1, com_tok_1 = self.gpt_chat(
-                processed_input=input_for_simulation
-            )
-
-            item['api_calls'] += 1
-            pr_tok += pr_tok_1
-            com_tok += com_tok_1
-
-            print("\n\n" + "_" * 70)
-            print(f"Response from Simulation: {plan_no}\n\n")
-            print(response, flush=True)
-
-            if "Plan Modification Needed" in response and "No Plan Modification Needed" not in response:
-                print("\n\n" + "_" * 70)
-                print(f"Plan Modification Needed. Skipping Debugging.")
-                continue
+            problem_with_planning = f"## Problem:\n{problem}\n\n{plan}"
 
 
             # Code generation
@@ -296,108 +272,97 @@ class SCoder(DirectStrategy):
                 }
             ]
 
-            print("\n\n" + "_" * 70)
-            print(f"Input for final code generation:\n\n")
-            print(input_for_final_code_generation[0]['content'], flush=True)
+            if self.verbose >= VERBOSE_FULL:
+                print("\n\n" + "_" * 70)
+                print(f"Input for final code generation:\n\n")
+                print(input_for_final_code_generation[0]['content'], flush=True)
 
-            response, pr_tok_1, com_tok_1 = self.gpt_chat(
+            response = self.gpt_chat(
                 input_for_final_code_generation
             )
 
-            item['api_calls'] += 1
-            pr_tok += pr_tok_1
-            com_tok += com_tok_1
-
-            print("\n\n" + "_" * 70)
-            print(f"Response from final code generation:\n\n")
-            print(response, flush=True)
+            if self.verbose >= VERBOSE_FULL:
+                print("\n\n" + "_" * 70)
+                print(f"Response from final code generation:\n\n")
+                print(response, flush=True)
 
             code = parse_response(response)
 
-            passed, test_log = self.check(item, additional_io, code)
+            passed, test_log = self.check(data_row, additional_io, code)
 
             # Do not need to go for debugging steps
             if passed:
                 break
 
-            problem_with_solution = f"{problem_with_planning}\n\n## Code:\n\n```{self.language}\n{code}\n```"
+            problem_with_solution = f"{problem_with_planning}\n\n### Code:\n\n```{self.language}\n{code}\n```"
 
             # Debugging
-            for debug_no in range(1, self.d + 1):
+            for debug_no in range(1, self.max_debug_try + 1):
                 
-
-                input_for_improving_code = [
+                summary_generation_input = [
                     {
                         "role": "user",
                         "content": prompt_for_debugging.format(
+                            language=self.language,
                             problem_with_solution=problem_with_solution,
+                            test_log=test_log,
+                        ),
+                    },
+                ]
+
+                if self.verbose >= VERBOSE_FULL:
+                    print("\n\n" + "_" * 70)
+                    print(f"Input for Debugging: {plan_no}, {debug_no}\n\n")
+                    print(summary_generation_input[0]['content'], flush=True)
+
+                response = self.gpt_chat(summary_generation_input)
+
+                if self.verbose >= VERBOSE_FULL:
+                    print("\n\n" + "_" * 70)
+                    print(f"Response from Debugging: {plan_no}, {debug_no}\n\n")
+                    print(response, flush=True)
+                
+                input_for_improving_code = [
+                    {
+                        "role": "user",
+                        "content": prompt_for_code_improvement.format(
+                            problem_with_planning=problem_with_planning,
+                            code=code,
                             language=self.language,
                             test_log=test_log,
                             std_input_prompt=std_input_prompt,
-                            summary=summary
+                            debug_info=response,
                         )
                     }
                 ]
 
-                print("\n\n" + "_" * 70)
-                print(f"Input for Debugging: {plan_no}, {debug_no}\n\n")
-                print(input_for_improving_code[0]['content'], flush=True)
+                if self.verbose >= VERBOSE_FULL:
+                    print("\n\n" + "_" * 70)
+                    print(f"Input for Improving code: {plan_no}, {debug_no}\n\n")
+                    print(input_for_improving_code[0]['content'], flush=True)
 
-                response, pr_tok_1, com_tok_1 = self.gpt_chat(
-                    input_for_improving_code
-                )
-                item['api_calls'] += 1
-                pr_tok += pr_tok_1
-                com_tok += com_tok_1
+                response = self.gpt_chat(input_for_improving_code)
 
-                print("\n\n" + "_" * 70)
-                print(f"Response from Debugging: {plan_no}, {debug_no}\n\n")
-                print(response, flush=True)
+                if self.verbose >= VERBOSE_FULL:
+                    print("\n\n" + "_" * 70)
+                    print(f"Response from Improving code: {plan_no}, {debug_no}\n\n")
+                    print(response, flush=True)
 
                 code = parse_response(response)
 
-                # problem_with_solution = f"{problem_with_solution}\n\n## Debug Attempt {debug_no}:\n\n{response}\n"
-
-                passed, test_log = self.check(item, additional_io, code)
+                passed, test_log = self.check(data_row, additional_io, code)
 
                 # Passed so breaking this debugging loop
                 if passed:
                     break
             
-                summary_generation_input = [
-                    {
-                        "role": "user",
-                        "content": prompt_for_summary.format(
-                            problem_with_solution=problem_with_solution,
-                            test_log=test_log,
-                            debug_response=response
-                        ),
-                    },
-                ]
-
-                print("\n\n" + "_" * 70)
-                print(f"Input for Summary: {plan_no}, {debug_no}\n\n")
-                print(summary_generation_input[0]['content'], flush=True)
-
-                response, pr_tok_1, com_tok_1 = self.gpt_chat(
-                    processed_input=summary_generation_input,
-                )
-                item['api_calls'] += 1
-                pr_tok += pr_tok_1
-                com_tok += com_tok_1
-
-                print("\n\n" + "_" * 70)
-                print(f"Response from Summary: {plan_no}, {debug_no}\n\n")
-                print(response, flush=True)
-
-                summary = f"### Experience from previous run\n\n{response}\n\n[Use this experience to debug the code.]"
-
-
             if passed:
                 break
 
-        print("________________________\n\n", flush=True)
-        return code, pr_tok, com_tok
+        if self.verbose >= VERBOSE_FULL:
+            print("\n\n" + "_" * 70)
+
+        return code
 
 
 
@@ -534,49 +499,6 @@ Your response should be structured as follows:
 """
 
 
-prompt_for_simulation = """# Instructions
-
-You are a programmer tasked with verifying a plan to solve a given problem using the **{language}** programming language.
-
-**Steps to Evaluate the Plan:**
-
-1. **Simulation**
-
-   - Take the sample input and apply plan step by step to get the output.
-   - Compare the generated output with the sample output to verify if your plan works as expected.
-
-2. **Plan Evaluation**
-
-   - **If the simulation is successful**: Write "**No Need to Modify Plan**".
-   - **If the simulation fails**: Write "**Plan Modification Needed**".
-
----
-
-{problem_with_planning}
-
----
-
-**Expected Output:**
-
-Your response should be structured as follows:
-
-### Simulation
-
-[The simulation of the sample input according to the plan.]
-
-### Plan Evaluation
-
-[**No Need to Modify Plan** or **Plan Modification Needed**]
-
----
-
-**Important:**
-
-- **Strictly follow the instructions.**
-- Do not generate code.
-"""
-
-
 prompt_for_code_generation = """# Instructions
 
 You are a programmer tasked with solving a given problem using the **{language}** programming language. See the plan to solve the plan and implement code to solve it.
@@ -609,27 +531,15 @@ prompt_for_debugging = """# Instructions
 
 You are a programmer who has received some code written in **{language}** that fails to pass certain test cases. Your task is to:
 
-1. **Simulation**
-
-    - Select a failed test sample.
-    - Take the sample input from that test case and apply the generated code on it line by line to see the output of each step.
-    - Compare the ouput of each step with the plan to identify the buggy statement from the code.
-
-2. **Correct the Code**
-
-    - Modify the code to resolve the issues.
-    - Ensure that the corrected code aligns with the original plan.
-    - Include comments explaining the corrections made.
-
----
+- Select a failed test sample.
+- Take the sample input from that test case and apply the generated code on it line by line to see the output of each step.
+- Compare the ouput of each step with the plan to identify the buggy statement from the code.
 
 {problem_with_solution}
 
 ### Test Report
 
 {test_log}
-
-{summary}
 
 ---
 
@@ -639,16 +549,40 @@ Your response should be structured as follows:
 
 ### Simulation of failed test cases
 
-[Simulate the test case where it fails.]
+[Simulate the test case where it fails following the above mentioned steps.]
 
 ### Debugging Notes
 
 [Write any discrepancies or deviations from the plan in code generation.]
+"""
 
-### Modified Code
+
+prompt_for_code_improvement = """# Instructions
+
+You are a programmer tasked with solving a given problem using the **{language}** programming language. I have already tried to solve this problem but it results in buggy code. See the buggy code and debugging notes correct the implementation.
+
+---
+
+{problem_with_planning}
+
+### Buggy Code
+{code}
+
+### Test Report
+
+{test_log}
+
+
+{debug_info}
+
+---
+
+**Expected Output:**
+
+Your response should be structured as follows:
 
 ```{language}
-[Your corrected code, with comments explaining each correction.]
+[Modified code implementing the plan, with comments explaining each step.]
 ```
 
 ---
@@ -656,31 +590,7 @@ Your response should be structured as follows:
 **Important:**
 
 - **Strictly follow the instructions.**
-- The generated **{language}** code must be enclosed within triple backticks (```).
+- Do not add any explanation.
+- The generated **{language}** code must be inside a triple backtick (```) code block.
 {std_input_prompt}"""
-
-
-prompt_for_summary = """# Instructions
-
-You are a code reviewer tasked with providing the summary based on the previous attempts so that on the next try programmer can avoid that path.
-
----
-
-{problem_with_solution}
-
-{debug_response}
-
-### Test Report
-
-{test_log}
-
-### Summary
-[Write summary here]
-
----
-
-**Important Guidelines:**
-- Your summary should be concise and should inital code generation attempt and also the debugging attempt.
-"""
-
 

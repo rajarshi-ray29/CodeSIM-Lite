@@ -9,6 +9,7 @@ from datasets.Dataset import Dataset
 from results.Results import Results
 from utils.parse import parse_response
 from time import perf_counter_ns
+from utils.verboseType import *
 
 class BaseStrategy(object):
     def __init__(
@@ -18,7 +19,7 @@ class BaseStrategy(object):
         language: str,
         pass_at_k: int,
         results: Results,
-        verbose: bool = True,
+        verbose: int = VERBOSE_FULL,
     ):
         self.model = model
         self.data = data
@@ -57,14 +58,16 @@ class BaseStrategy(object):
     def run_single_pass(self, data_row: dict):
         pass
 
-    def run(self):
+    def run(self, record_full_result):
         num_items = len(self.data)
         num_success = 0
 
         for i, data_row in enumerate(self.data):
-            print("", flush=True, end="")
+            if self.verbose >= VERBOSE_FULL:
+                print("", flush=True, end="")
 
-            if i < len(self.results) and data_row[self.data.id_key] == self.results[i]["task_id"]:
+            if i < len(self.results) and \
+                data_row[self.data.id_key] == self.results[i]["task_id"]:
                 item = copy.deepcopy(self.results[i])
                 cur_pass = len(item["source_codes"])
                 is_solved = item["is_solved"]
@@ -72,7 +75,7 @@ class BaseStrategy(object):
             else:
                 item = {
                     self.data.id_key: data_row[self.data.id_key],
-                    "task_id": item[self.data.id_key],
+                    "task_id": data_row[self.data.id_key],
                     "language": self.language,
                     "source_codes": [],
                     "run_details": [],
@@ -85,7 +88,7 @@ class BaseStrategy(object):
 
             while cur_pass < self.pass_at_k and not is_solved:
                 # initialize it for each run
-                self.run_details = []
+                self.run_details = {}
                 # for _ in range(10):
                 #     try:
                 response = self.run_single_pass(data_row)
@@ -97,6 +100,11 @@ class BaseStrategy(object):
                 cur_imp = parse_response(response)
 
                 item["source_codes"].append(cur_imp)
+
+                # Remove Full details
+                if not record_full_result:
+                    del self.run_details["details"]
+
                 item["run_details"].append(self.run_details)
                 
                 item["no_of_try"] += 1
@@ -123,11 +131,11 @@ class BaseStrategy(object):
             else:
                 self.results.add_result(item)
 
-            if self.verbose:
-                print(
-                    f'completed {i+1}/{num_items}, Solved: {self.results[i]["is_solved"]}, number of success = {num_success}/{i+1}, acc = {round(num_success/(i+1)*100, 2)}')
+            if self.verbose >= VERBOSE_MINIMAL:
+                print(f'completed {i+1}/{num_items}, Solved: {self.results[i]["is_solved"]}, number of success = {num_success}/{i+1}, acc = {round(num_success/(i+1)*100, 2)}')
             
             self.results.save_results()
 
-            print("", flush=True, end="")
+            if self.verbose >= VERBOSE_FULL:
+                print("", flush=True, end="")
 

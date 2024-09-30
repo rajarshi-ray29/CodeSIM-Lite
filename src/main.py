@@ -12,6 +12,8 @@ from promptings.PromptingFactory import PromptingFactory
 from datasets.DatasetFactory import DatasetFactory
 from models.ModelFactory import ModelFactory
 
+from utils.verboseType import *
+
 from utils.summary import gen_summary
 from utils.runEP import run_eval_plus
 from utils.evaluateET import generate_et_dataset_human
@@ -101,6 +103,37 @@ parser.add_argument(
     ]
 )
 
+parser.add_argument(
+    "--result_log",
+    type=str,
+    default="partial",
+    choices=[
+        "full",
+        "partial"
+    ]
+)
+
+parser.add_argument(
+    "--verbose",
+    type=str,
+    default="2",
+    choices=[
+        "2",
+        "1",
+        "0",
+    ]
+)
+
+parser.add_argument(
+    "--store_log_in_file",
+    type=str,
+    default="yes",
+    choices=[
+        "yes",
+        "no",
+    ]
+)
+
 args = parser.parse_args()
 
 DATASET = args.dataset
@@ -111,6 +144,9 @@ TOP_P = args.top_p
 PASS_AT_K = args.pass_at_k
 LANGUAGE = args.language
 CONTINUE = args.cont
+RESULT_LOG_MODE = args.result_log
+VERBOSE = args.verbose
+STORE_LOG_IN_FILE = args.store_log_in_file
 
 RUN_NAME = f"results/{DATASET}/{STRATEGY}/{MODEL_NAME}/{LANGUAGE}-{TEMPERATURE}-{TOP_P}-{PASS_AT_K}"
 
@@ -130,13 +166,14 @@ RESULTS_PATH = f"{RUN_NAME}/Results.jsonl"
 SUMMARY_PATH = f"{RUN_NAME}/Summary.txt"
 LOGS_PATH = f"{RUN_NAME}/Log.txt"
 
-sys.stdout = open(
-    LOGS_PATH,
-    mode="a",
-    encoding="utf-8"
-)
+if STORE_LOG_IN_FILE.lower() == 'yes':
+    sys.stdout = open(
+        LOGS_PATH,
+        mode="a",
+        encoding="utf-8"
+    )
 
-if CONTINUE == "no":
+if CONTINUE == "no" and VERBOSE >= VERBOSE_MINIMAL:
     print(f"""
 ##################################################
 Experiment start {RUN_NAME}, Time: {datetime.now()}
@@ -149,11 +186,13 @@ strategy = PromptingFactory.get_prompting_class(STRATEGY)(
     language=LANGUAGE,
     pass_at_k=PASS_AT_K,
     results=Results(RESULTS_PATH),
+    verbose=VERBOSE
 )
 
-strategy.run()
+strategy.run(RESULT_LOG_MODE.lower() == 'full')
 
-print(f"""
+if VERBOSE >= VERBOSE_MINIMAL:
+    print(f"""
 ##################################################
 Experiment end {RUN_NAME}, Time: {datetime.now()}
 ###################################################
@@ -181,6 +220,6 @@ elif "mbpp" in DATASET.lower():
     # generate_ep_dataset_human(RESULTS_PATH, EP_RESULTS_PATH)
     # run_eval_plus(EP_RESULTS_PATH, EP_SUMMARY_PATH, "mbpp")
 
-
-sys.stdout.close()
+if STORE_LOG_IN_FILE.lower() == 'yes':
+    sys.stdout.close()
 

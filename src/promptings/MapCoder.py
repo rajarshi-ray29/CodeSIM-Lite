@@ -21,6 +21,7 @@ from datasets.CodeContestDataset import CodeContestDataset
 
 from results.Results import Results
 from evaluations.func_evaluate import evaluate_io
+from utils.verboseType import *
 
 mapping = {
     1: "one (01)",
@@ -164,7 +165,8 @@ class MapCoder(BaseStrategy):
         return sample_io
 
     def run_single_pass(self, data_row: dict):
-        print("", flush=True)
+        if self.verbose >= VERBOSE_FULL:
+            print("", flush=True)
 
         input_kb_exemplars = [
             {
@@ -210,9 +212,10 @@ Your response must follow the following xml format-
             },
         ]
 
-        print("\n\n________________________")
-        print("Input for knowledge base and exemplars: ")
-        print(input_kb_exemplars[0]['content'], flush=True)
+        if self.verbose >= VERBOSE_FULL:
+            print("\n\n________________________")
+            print("Input for knowledge base and exemplars: ")
+            print(input_kb_exemplars[0]['content'], flush=True)
 
         response = self.gpt_chat(
             processed_input=input_kb_exemplars
@@ -232,9 +235,10 @@ Your response must follow the following xml format-
         response = self.replace_tag(response, 'code')
         response = self.replace_tag(response, 'planning')
 
-        print("\n\n________________________")
-        print("Response from knowledge base and exemplars: ")
-        print(response, flush=True)
+        if self.verbose >= VERBOSE_FULL:
+            print("\n\n________________________")
+            print("Response from knowledge base and exemplars: ")
+            print(response, flush=True)
 
         response = self.parse_xml(response)
 
@@ -254,10 +258,11 @@ Your response must follow the following xml format-
                 }
             ]
 
-            print("\n\n________________________")
-            print(
-                f"Input for our problem planning using example: {example_no}: ")
-            print(input_for_problem_planning[0]['content'], flush=True)
+            if self.verbose >= VERBOSE_FULL:
+                print("\n\n________________________")
+                print(
+                    f"Input for our problem planning using example: {example_no}: ")
+                print(input_for_problem_planning[0]['content'], flush=True)
 
             planning = self.gpt_chat(
                 input_for_problem_planning
@@ -266,9 +271,10 @@ Your response must follow the following xml format-
             # planning = self.parse_xml(planning)
             # planning['confidence'] = int(str(planning['confidence']).strip())
 
-            print("\n\n________________________")
-            print("Response from our problem planning: ")
-            print(planning, flush=True)
+            if self.verbose >= VERBOSE_FULL:
+                print("\n\n________________________")
+                print("Response from our problem planning: ")
+                print(planning, flush=True)
 
             input_for_planning_verification = [
                 {
@@ -277,8 +283,9 @@ Your response must follow the following xml format-
                 }
             ]
 
-            print("Input for planning verification: ")
-            print(input_for_planning_verification[0]['content'], flush=True)
+            if self.verbose >= VERBOSE_FULL:
+                print("Input for planning verification: ")
+                print(input_for_planning_verification[0]['content'], flush=True)
 
             verification_res = self.gpt_chat(
                 input_for_planning_verification
@@ -293,8 +300,9 @@ Your response must follow the following xml format-
             verification_res['confidence'] = int(
                 str(verification_res['confidence']).strip())
 
-            print("Response from planning verification: ")
-            print(verification_res, flush=True)
+            if self.verbose >= VERBOSE_FULL:
+                print("Response from planning verification: ")
+                print(verification_res, flush=True)
 
             plannings.append((
                 planning,
@@ -323,9 +331,10 @@ Your response must follow the following xml format-
                 }
             ]
 
-            print("\n\n________________________")
-            print("Input for final code generation: ")
-            print(input_for_final_code_generation[0]['content'], flush=True)
+            if self.verbose >= VERBOSE_FULL:
+                print("\n\n________________________")
+                print("Input for final code generation: ")
+                print(input_for_final_code_generation[0]['content'], flush=True)
 
             code = self.gpt_chat(
                 input_for_final_code_generation
@@ -333,9 +342,10 @@ Your response must follow the following xml format-
 
             code = self.parse_code(code)
 
-            print("\n\n________________________")
-            print("Response from final code generation: ")
-            print(code, flush=True)
+            if self.verbose >= VERBOSE_FULL:
+                print("\n\n________________________")
+                print("Response from final code generation: ")
+                print(code, flush=True)
 
             response = f"## Planning: {planning}\n## Code:\n```\n{code}\n```"
             passed = False
@@ -350,7 +360,8 @@ Your response must follow the following xml format-
                 if passed:
                     break
 
-                print(f"Input for improving code generation: {i}")
+                if self.verbose >= VERBOSE_FULL:
+                    print(f"Input for improving code generation: {i}")
                 input_for_improving_code = [
                     {
                         "role": "user",
@@ -358,23 +369,26 @@ Your response must follow the following xml format-
                     }
                 ]
 
-                print("\n\n________________________")
-                print("Input for improving code generation: ")
-                print(input_for_improving_code[0]['content'], flush=True)
+                if self.verbose >= VERBOSE_FULL:
+                    print("\n\n________________________")
+                    print("Input for improving code generation: ")
+                    print(input_for_improving_code[0]['content'], flush=True)
 
                 response = self.gpt_chat(
                     input_for_improving_code
                 )
                 code = self.parse_code(response)
 
-                print("\n\n________________________")
-                print("Response from improving code generation: ")
-                print(response, flush=True)
+                if self.verbose >= VERBOSE_FULL:
+                    print("\n\n________________________")
+                    print("Response from improving code generation: ")
+                    print(response, flush=True)
 
             # got a code that passed all sample test cases
             if passed:
                 break
 
-        print("________________________\n\n", flush=True)
+        if self.verbose >= VERBOSE_FULL:
+            print("________________________\n\n", flush=True)
         
         return code
