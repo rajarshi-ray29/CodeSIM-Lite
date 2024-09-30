@@ -21,7 +21,7 @@ from datasets.CodeContestDataset import CodeContestDataset
 
 from results.Results import Results
 from evaluations.func_evaluate import evaluate_io
-from utils.verboseType import *
+from constants.verboseType import *
 
 mapping = {
     1: "one (01)",

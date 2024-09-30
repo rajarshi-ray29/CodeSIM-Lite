@@ -23,7 +23,7 @@ from datasets.CodeContestDataset import CodeContestDataset
 from evaluations.func_evaluate import evaluate_io
 
 from utils.parse import parse_response
-from utils.verboseType import *
+from constants.verboseType import *
 
 class SCoder(DirectStrategy):
     def __init__(

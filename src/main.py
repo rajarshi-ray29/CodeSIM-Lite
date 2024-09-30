@@ -12,7 +12,7 @@ from promptings.PromptingFactory import PromptingFactory
 from datasets.DatasetFactory import DatasetFactory
 from models.ModelFactory import ModelFactory
 
-from utils.verboseType import *
+from constants.verboseType import *
 
 from utils.summary import gen_summary
 from utils.runEP import run_eval_plus

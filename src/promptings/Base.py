@@ -9,7 +9,7 @@ from datasets.Dataset import Dataset
 from results.Results import Results
 from utils.parse import parse_response
 from time import perf_counter_ns
-from utils.verboseType import *
+from constants.verboseType import *
 
 class BaseStrategy(object):
     def __init__(
