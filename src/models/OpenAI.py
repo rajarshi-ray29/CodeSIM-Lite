@@ -79,7 +79,6 @@ class GPTV1Base(OpenAIModel):
                  response.usage.prompt_tokens) / 1e6
         cost += (self.model["completion_token_cost"] *
                  response.usage.completion_tokens) / 1e6
-        total_cost += cost
 
         with open(cost_log_file_path, mode="a") as file:
             file.write(f"{self.model["name"]},{response.usage.prompt_tokens},{response.usage.completion_tokens},{cost}\n")
@@ -90,7 +89,7 @@ class GPTV1Base(OpenAIModel):
 
             "prompt_tokens": response.usage.prompt_tokens,
             "completion_tokens": response.usage.completion_tokens,
-            "cost": total_cost,
+            "cost": cost,
 
             "details": [
                 {
@@ -176,7 +175,6 @@ class GPTV2Base(OpenAIModel):
                  response["usage"]["prompt_tokens"]) / 1e6
         cost += (self.model["completion_token_cost"] *
                  response["usage"]["completion_tokens"]) / 1e6
-        total_cost += cost
 
         with open(cost_log_file_path, mode="a") as file:
             file.write(f"{self.model["name"]},{response["usage"]["prompt_tokens"]},{response["usage"]["completion_tokens"]},{cost}\n")
@@ -187,7 +185,7 @@ class GPTV2Base(OpenAIModel):
 
             "prompt_tokens": response["usage"]["prompt_tokens"],
             "completion_tokens": response["usage"]["completion_tokens"],
-            "cost": total_cost,
+            "cost": cost,
 
             "details": [
                 {
