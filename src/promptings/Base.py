@@ -59,6 +59,8 @@ class BaseStrategy(object):
         pass
 
     def run(self, record_full_result):
+        self.data.data.reverse()
+        
         num_items = len(self.data)
         num_success = 0
 
