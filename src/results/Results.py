@@ -1,6 +1,6 @@
 import os
 
-from utils.jsonl import read_jsonl, write_jsonl
+from utils.jsonl import read_jsonl, write_jsonl, append_in_jsonl
 
 """
 In this file, we define the Results class, 
@@ -26,7 +26,10 @@ class Results(object):
 
     def add_result(self, result: dict):
         self.results.append(result)
-        self.save_results()
+        self.append_results(result)
+    
+    def append_results(self, result):
+        append_in_jsonl(self.result_path, result)
 
     def save_results(self):
         write_jsonl(self.result_path, self.results)
