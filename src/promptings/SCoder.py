@@ -299,39 +299,15 @@ class SCoder(DirectStrategy):
             # Debugging
             for debug_no in range(1, self.max_debug_try + 1):
                 
-                summary_generation_input = [
+                input_for_debugging = [
                     {
                         "role": "user",
                         "content": prompt_for_debugging.format(
-                            language=self.language,
-                            problem_with_solution=problem_with_solution,
-                            test_log=test_log,
-                        ),
-                    },
-                ]
-
-                if self.verbose >= VERBOSE_FULL:
-                    print("\n\n" + "_" * 70)
-                    print(f"Input for Debugging: {plan_no}, {debug_no}\n\n")
-                    print(summary_generation_input[0]['content'], flush=True)
-
-                response = self.gpt_chat(summary_generation_input)
-
-                if self.verbose >= VERBOSE_FULL:
-                    print("\n\n" + "_" * 70)
-                    print(f"Response from Debugging: {plan_no}, {debug_no}\n\n")
-                    print(response, flush=True)
-                
-                input_for_improving_code = [
-                    {
-                        "role": "user",
-                        "content": prompt_for_code_improvement.format(
                             problem_with_planning=problem_with_planning,
                             code=code,
                             language=self.language,
                             test_log=test_log,
                             std_input_prompt=std_input_prompt,
-                            debug_info=response,
                         )
                     }
                 ]
@@ -339,9 +315,9 @@ class SCoder(DirectStrategy):
                 if self.verbose >= VERBOSE_FULL:
                     print("\n\n" + "_" * 70)
                     print(f"Input for Improving code: {plan_no}, {debug_no}\n\n")
-                    print(input_for_improving_code[0]['content'], flush=True)
+                    print(input_for_debugging[0]['content'], flush=True)
 
-                response = self.gpt_chat(input_for_improving_code)
+                response = self.gpt_chat(input_for_debugging)
 
                 if self.verbose >= VERBOSE_FULL:
                     print("\n\n" + "_" * 70)
@@ -496,7 +472,7 @@ Your response should be structured as follows:
 **Important:**
 
 - **Strictly follow the instructions.**
-- Do not generate code.
+- **Do not generate code.**
 """
 
 
@@ -530,47 +506,9 @@ Your response should be structured as follows:
 
 prompt_for_debugging = """# Instructions
 
-You are a programmer who has received some code written in **{language}** that fails to pass certain test cases. Your task is to:
+You are a programmer who has received some code written in **{language}** that fails to pass certain test cases. Your task is to modify the code in such a way so that it can pass all the test cases.
 
-- Select a failed test sample.
-- Take the sample input from that test case and apply the generated code on it line by line to see the output of each step.
-- Compare the ouput of each step with the plan to identify the buggy statement from the code.
-
-{problem_with_solution}
-
-### Test Report
-
-{test_log}
-
----
-
-**Expected Output:**
-
-Your response should be structured as follows:
-
-### Simulation of failed test cases
-
-[Simulate the test case where it fails following the above mentioned steps.]
-
-### Debugging Notes
-
-[Write any discrepancies or deviations from the plan in code generation.]---
-
-**Important:**
-
-- **Strictly follow the instructions.**
-- Do not generate code.
-- Give guideline to debug the code.
-"""
-
-
-prompt_for_code_improvement = """# Instructions
-
-You are a programmer tasked with solving a given problem using the **{language}** programming language. I have already tried to solve this problem but it results in buggy code. See the buggy code and debugging notes correct the implementation.
-
----
-
-{problem_with_planning}
+{problem_with_plannig}
 
 ### Buggy Code
 {code}
@@ -579,17 +517,20 @@ You are a programmer tasked with solving a given problem using the **{language}*
 
 {test_log}
 
-
-{debug_info}
-
 ---
 
 **Expected Output:**
 
 Your response should be structured as follows:
 
+### Debugging Notes
+
+[Write any discrepancies or deviations from the plan in previous code generation.]
+
+### Modified Code
+
 ```{language}
-[Modified code implementing the plan, with comments explaining each step.]
+[Your corrected code, with comments explaining each correction.]
 ```
 
 ---
@@ -597,7 +538,6 @@ Your response should be structured as follows:
 **Important:**
 
 - **Strictly follow the instructions.**
-- Do not add any explanation.
-- The generated **{language}** code must be inside a triple backtick (```) code block.
+- The generated **{language}** code must be enclosed within triple backticks (```).
 {std_input_prompt}"""
 
