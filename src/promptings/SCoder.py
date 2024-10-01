@@ -29,7 +29,7 @@ class SCoder(DirectStrategy):
     def __init__(
         self,
         additional_info_run=3,
-        max_plan_try=3,
+        max_plan_try=5,
         max_debug_try=5,
         *args,
         **kwargs
@@ -180,7 +180,7 @@ class SCoder(DirectStrategy):
             passed, _ = evaluate_io(additional_io, f"{data_row["prompt"]}\n\n{data_row["canonical_solution"]}")
             self.run_details["additional_io_correctness"] = passed
             if not passed and self.verbose >= VERBOSE_FULL:
-                print("Problem in additional IO")
+                print("Problem in additional IO or canonical solution")
 
         # # Forcing no sample io 
         # self.data_row['sample_io'] = []
@@ -294,7 +294,7 @@ class SCoder(DirectStrategy):
             if passed:
                 break
 
-            problem_with_solution = f"{problem_with_planning}\n\n### Code:\n\n```{self.language}\n{code}\n```"
+            # problem_with_solution = f"{problem_with_planning}\n\n### Code:\n\n```{self.language}\n{code}\n```"
 
             # Debugging
             for debug_no in range(1, self.max_debug_try + 1):
