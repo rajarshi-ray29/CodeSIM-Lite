@@ -1,6 +1,7 @@
 from models.Gemini import Gemini
 from models.OpenAI import OpenAIModel
 from models.OpenAI import ChatGPT
+from models.OpenAI import ChatGPT3
 from models.OpenAI import GPT4
 from models.OpenAI import GPT4T
 from models.OpenAI import GPT4o
@@ -14,6 +15,8 @@ class ModelFactory:
             return Gemini
         elif model_name == "chatgpt":
             return ChatGPT
+        elif model_name == "chatgpt3":
+            return ChatGPT3
         elif model_name == "gpt4":
             return GPT4
         elif model_name == "gpt4t":
