@@ -14,34 +14,37 @@ def gen_summary(results_path: str, summary_path: str):
 
     accuracy = solved / (solved + unsolved)
 
-    normal_solved = len(results.query("is_solved == True & api_calls == 2"))
-    our_solved = len(results.query("is_solved == True & api_calls > 2"))
+    # normal_solved = len(results.query("is_solved == True & api_calls == 2"))
+    # our_solved = len(results.query("is_solved == True & api_calls > 2"))
 
-    total_prompt_tokens = sum(results["prompt_tokens"].sum())
-    total_completion_tokens = sum(results["completion_tokens"].sum())
+    total_prompt_tokens = results['run_details'].apply(lambda x: sum(run['prompt_tokens'] for run in x)).sum()
+    total_completion_tokens = results['run_details'].apply(lambda x: sum(run['completion_tokens'] for run in x)).sum()
+    total_taken_time = results['run_details'].apply(lambda x: sum(run['taken_time'] for run in x)).sum()
+    total_cost = results['run_details'].apply(lambda x: sum(run['cost'] for run in x)).sum()
 
     average_prompt_tokens = total_prompt_tokens / len(results)
     average_completion_tokens = total_completion_tokens / len(results)
+    average_taken_time = total_taken_time / len(results)
     
-    total_api_calls = results["api_calls"].sum()
-    max_api_calls = results["api_calls"].max()
-    min_api_calls = results["api_calls"].min()
+    total_api_calls = results['run_details'].apply(lambda x: sum(run['api_calls'] for run in x)).sum()
+    max_api_calls = results['run_details'].apply(lambda x: sum(run['api_calls'] for run in x)).max()
+    min_api_calls = results['run_details'].apply(lambda x: sum(run['api_calls'] for run in x)).min()
     average_api_calls = total_api_calls / len(results)
 
-    false_results = results.query("is_solved == False")['api_calls'].value_counts()
-    true_results = results.query("is_solved == True")['api_calls'].value_counts()
+    false_results = results.query("is_solved == False")['run_details'].apply(lambda x: sum(run['api_calls'] for run in x)).value_counts()
+    true_results = results.query("is_solved == True")['run_details'].apply(lambda x: sum(run['api_calls'] for run in x)).value_counts()
 
     with open(summary_path, mode="w", encoding="utf-8") as summary_file:
         # Define a width for alignment
         name_width = 30
         value_width = 10
 
-        summary_file.write(f"{'Accuracy:':<{name_width}} {accuracy*100:>{value_width}.02f}\n")
+        summary_file.write(f"{'Accuracy:':<{name_width}} {accuracy*100:>{value_width}.01f}\n")
         summary_file.write(f"{'Solved:':<{name_width}} {solved:>{value_width}}\n")
         summary_file.write(f"{'Unsolved:':<{name_width}} {unsolved:>{value_width}}\n")
-        summary_file.write(f"\n")
-        summary_file.write(f"{'Normal Solved:':<{name_width}} {normal_solved:>{value_width}}\n")
-        summary_file.write(f"{'Our Solved:':<{name_width}} {our_solved:>{value_width}}\n")
+        # summary_file.write(f"\n")
+        # summary_file.write(f"{'Normal Solved:':<{name_width}} {normal_solved:>{value_width}}\n")
+        # summary_file.write(f"{'Our Solved:':<{name_width}} {our_solved:>{value_width}}\n")
         summary_file.write(f"\n")
         summary_file.write(f"\n")
         summary_file.write(f"{'Total Prompt Tokens:':<{name_width}} {total_prompt_tokens:>{value_width}}\n")
@@ -49,6 +52,11 @@ def gen_summary(results_path: str, summary_path: str):
         summary_file.write(f"\n")
         summary_file.write(f"{'Total Completion Tokens:':<{name_width}} {total_completion_tokens:>{value_width}}\n")
         summary_file.write(f"{'Average Completion Tokens:':<{name_width}} {average_completion_tokens:>{value_width}.0f}\n")
+        summary_file.write(f"\n")
+        summary_file.write(f"{'Total Taken Time:':<{name_width}}s {total_taken_time:>{value_width}.02f}\n")
+        summary_file.write(f"{'Average Taken Time:':<{name_width}}s {average_taken_time:>{value_width}.02f}\n")
+        summary_file.write(f"\n")
+        summary_file.write(f"{'Total Cost:':<{name_width}} {total_cost:>{value_width}.02f}\n")
         summary_file.write(f"\n")
         summary_file.write(f"{'Total Api Calls:':<{name_width}} {total_api_calls:>{value_width}}\n")
         summary_file.write(f"{'Max Api Calls:':<{name_width}} {max_api_calls:>{value_width}}\n")
