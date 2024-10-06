@@ -193,7 +193,8 @@ class SCoder(DirectStrategy):
                 "content": prompt_for_initial_code_generation.format(
                     problem=problem,
                     language=self.language,
-                    std_input_prompt=std_input_prompt
+                    std_input_prompt=std_input_prompt,
+                    additional_io="\n".join(additional_io),
                 ),
             },
         ]
@@ -260,6 +261,39 @@ class SCoder(DirectStrategy):
             problem_with_planning = f"## Problem:\n{problem}\n\n{plan}"
 
 
+            # Simulation Phase
+            input_for_simulation = [
+                {
+                    "role": "user",
+                    "content": prompt_for_simulation.format(
+                        problem_with_planning=problem_with_planning,
+                        language=self.language,
+                    )
+                },
+            ]
+
+            if self.verbose >= VERBOSE_FULL:
+                print("\n\n" + "_" * 70)
+                print(f"Input for Simulation: {plan_no}\n\n")
+                print(input_for_simulation[0]['content'], flush=True)
+
+            response = self.gpt_chat(
+                processed_input=input_for_simulation
+            )
+
+            if self.verbose >= VERBOSE_FULL:
+                print("\n\n" + "_" * 70)
+                print(f"Response from Simulation: {plan_no}\n\n")
+                print(response, flush=True)
+
+            if "Plan Modification Needed" in response and \
+                "No Plan Modification Needed" not in response:
+                if self.verbose >= VERBOSE_FULL:
+                    print("\n\n" + "_" * 70)
+                    print(f"**Plan Modification Needed. Skipping Rest.**\n")
+                continue
+
+
             # Code generation
             input_for_final_code_generation = [
                 {
@@ -268,6 +302,7 @@ class SCoder(DirectStrategy):
                         problem_with_planning=problem_with_planning,
                         language=self.language,
                         std_input_prompt=std_input_prompt,
+                        additional_io="\n".join(additional_io),
                     )
                 }
             ]
@@ -341,22 +376,7 @@ class SCoder(DirectStrategy):
         return code
 
 
-
-prompt_for_additional_io = """# Instructions
-
-You are a tester tasked with creating comprehensive unit test cases for a given programming problem.
-
-**Your tasks:**
-
-1. **Understand the Problem**
-
-   - Read and comprehend the programming problem provided.
-
-2. **Generate Test Cases**
-
-   - Create unit test cases that cover both **Normal** and **Edge** case scenarios to ensure the correctness of the code.
-   - Do not include the test cases that are mentioned in the problem description.
-   - Follow the style of the provided example problem while generation.
+prompt_for_additional_io = """You are a tester tasked with creating comprehensive unit test cases for a given programming problem.
 
 ---
 
@@ -397,22 +417,23 @@ assert maximum_segments(5, 9, 6, 10) == -1
 
 ## Test Cases
 
-**TODO:** Generate test cases for the problem above.
+Follow the following instructions while generating test cases:
 
----
-
-**Important:**
-
-- **Strictly follow the example problem style.**
-- **Do not generate more than 5 test cases.**
-- **Do not generate the sample test cases that are present inside the problem.**
-- **Write each test case in a single line.**
-- **Your response must contain the generated test cases enclosed within triple backticks (```).**
-- **Write clean and concise test cases that effectively test the functionality of the code.**
+    - Read and comprehend the programming problem provided. 
+    - Create unit test cases that cover both **Normal** and **Edge** case scenarios to ensure the correctness of the code.
+    - Write clean and concise test cases that effectively test the functionality of the code.
+    - Do not generate more than 5 test cases.
+    - Follow the style of the provided example problem while generation.
+        - Write each test case in a single line.
+        - Your response must contain the generated test cases enclosed within triple backticks (```).
+    - **Do not include the test cases that are mentioned in the problem description.**
 """
 
 
 prompt_for_initial_code_generation = """{problem}
+
+### Test cases to be considered while generating code
+{additional_io} 
 
 ---
 Important Instructions:
@@ -420,26 +441,7 @@ Important Instructions:
 {std_input_prompt}"""
 
 
-prompt_for_planning = """# Instructions
-
-You are a programmer tasked with generating appropriate plan to solve a given problem using the **{language}** programming language.
-
-**Steps to Solve the Problem:**
-
-1. **Recalling Relevant Problems**
-
-   - Try to find a similar problem you have encountered before.
-   - State the algorithm to solve that problem.
-
-2. **Problem Understanding**
-
-   - Think about the original problem.
-   - Develop an initial understanding to guide your planning.
-
-3. **Plan Generation**
-
-   - Write down a detailed, step-by-step plan to solve the problem.
-   - Ensure each step logically follows from the previous one.
+prompt_for_planning = """You are a programmer tasked with generating appropriate plan to solve a given problem using the **{language}** programming language.
 
 ---
 
@@ -455,30 +457,28 @@ You are a programmer tasked with generating appropriate plan to solve a given pr
 
 Your response should be structured as follows:
 
-### Example Problem
-
-[Recalling a relevant problem and algorithm to solve it.]
-
 ### Problem Understanding
 
-[Your thoughts on the problem, any similar problems, and how you plan to solve it.]
+[Think about the original problem. Develop an initial understanding about the problem.]
+
+### Recall Example Problem
+
+[Recalling a relevant programming problem, it's solution and plan to solve it.]
 
 ### Plan
 
-[Your detailed, step-by-step plan.]
+[Write down a detailed, step-by-step plan to solve the problem. Ensure each step logically follows from the previous one.]
 
 ---
 
-**Important:**
+**Important Instruction:**
 
-- **Strictly follow the instructions.**
-- **Do not generate code.**
+- Strictly follow the instructions.
+- Do not generate code.
 """
 
 
-prompt_for_code_generation = """# Instructions
-
-You are a programmer tasked with solving a given problem using the **{language}** programming language. See the plan to solve the plan and implement code to solve it.
+prompt_for_simulation = """You are a programmer tasked with verifying a plan to solve a given problem using the **{language}** programming language.
 
 ---
 
@@ -490,25 +490,54 @@ You are a programmer tasked with solving a given problem using the **{language}*
 
 Your response should be structured as follows:
 
+### Simulation
+
+[Take a sample input and apply plan step by step to get the output. Compare the generated output with the sample output to verify if your plan works as expected.]
+
+### Plan Evaluation
+
+[If the simulation is successful write **No Need to Modify Plan**. Otherwise write **Plan Modification Needed**.]
+
+---
+
+**Important Instructions:**
+
+- Strictly follow the instructions.
+- Do not generate code.
+"""
+
+
+prompt_for_code_generation = """You are a programmer tasked with solving a given problem using the **{language}** programming language. See the plan to solve the plan and implement code to solve it.
+
+---
+
+{problem_with_planning}
+
+### Test cases to be considered while generating code
+{additional_io} 
+
+---
+
+**Expected Output:**
+
+### {language} Code
+
 ```{language}
 [Your code implementing the plan, with comments explaining each step.]
 ```
 
 ---
 
-**Important:**
+**Important Instructions:**
 
-- **Strictly follow the instructions.**
 - Do not add any explanation.
 - The generated **{language}** code must be inside a triple backtick (```) code block.
 {std_input_prompt}"""
 
 
-prompt_for_debugging = """# Instructions
+prompt_for_debugging = """You are a programmer who has received some code written in **{language}** that fails to pass certain test cases. Your task is to modify the code in such a way so that it can pass all the test cases.
 
-You are a programmer who has received some code written in **{language}** that fails to pass certain test cases. Your task is to modify the code in such a way so that it can pass all the test cases.
-
-{problem_with_plannig}
+{problem_with_planning}
 
 ### Buggy Code
 {code}
@@ -535,9 +564,9 @@ Your response should be structured as follows:
 
 ---
 
-**Important:**
+**Important Instructions:**
 
-- **Strictly follow the instructions.**
+- Strictly follow the instructions.
 - The generated **{language}** code must be enclosed within triple backticks (```).
 {std_input_prompt}"""
 
