@@ -142,7 +142,7 @@ class GPTV2Base(OpenAIModel):
         self.sleep_time = sleep_time
 
 
-    @retry(wait=wait_random_exponential(min=60, max=600), stop=stop_after_attempt(5))
+    @retry(wait=wait_random_exponential(min=1, max=60), stop=stop_after_attempt(5))
     def prompt(
         self, 
         processed_input: list[dict], 
