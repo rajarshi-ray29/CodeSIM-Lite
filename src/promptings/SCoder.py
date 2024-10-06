@@ -127,65 +127,67 @@ class SCoder(DirectStrategy):
 
         additional_io = None
 
-        # Additional IO collection
-        for idx in range(1, self.additional_info_run + 1):
-            # Additional IO
-            additional_io_generation_input = [
-                {
-                    "role": "user",
-                    "content": prompt_for_additional_io.format(
-                        problem=problem
-                    ),
-                },
-            ]
+        if type(self.data) == MBPPDataset:
 
-            if self.verbose >= VERBOSE_FULL:
-                print("\n\n" + "_" * 70)
-                print(f"Input for Additional IO Generation: {idx}")
-                print(additional_io_generation_input[0]['content'], flush=True)
+            # Additional IO collection
+            for idx in range(1, self.additional_info_run + 1):
+                # Additional IO
+                additional_io_generation_input = [
+                    {
+                        "role": "user",
+                        "content": prompt_for_additional_io.format(
+                            problem=problem
+                        ),
+                    },
+                ]
 
-            response = self.gpt_chat(
-                processed_input=additional_io_generation_input,
-                frequency_penalty=0.2
-            )
+                if self.verbose >= VERBOSE_FULL:
+                    print("\n\n" + "_" * 70)
+                    print(f"Input for Additional IO Generation: {idx}")
+                    print(additional_io_generation_input[0]['content'], flush=True)
 
-            if self.verbose >= VERBOSE_FULL:
-                print("\n\n" + "_" * 70)
-                print(f"Response from Additional IO Generation: {idx}")
-                print(response, flush=True)
-
-            additional_io_response = parse_response(response)
-
-            # Applying intersection for self-consistancy
-            if additional_io is None:
-                additional_io = set(self.parse_test_cases(
-                    test_cases=additional_io_response
-                ))
-            else:
-                additional_io_ = self.parse_test_cases(
-                    test_cases=additional_io_response
+                response = self.gpt_chat(
+                    processed_input=additional_io_generation_input,
+                    frequency_penalty=0.2
                 )
-                additional_io = additional_io.intersection(set(additional_io_))
 
-        additional_io = list(additional_io)
-        if self.verbose >= VERBOSE_FULL:
-            print(f"Additional IOs:")
-            print(additional_io, flush=True)
+                if self.verbose >= VERBOSE_FULL:
+                    print("\n\n" + "_" * 70)
+                    print(f"Response from Additional IO Generation: {idx}")
+                    print(response, flush=True)
 
-        self.run_details["additional_io"] = additional_io
+                additional_io_response = parse_response(response)
 
-        # Check whether the additional IO is correct or not
-        # This block is just for keeping track off the correctness of additional IO
-        if type(self.data) == HumanDataset:
-            passed, _ = evaluate_io(additional_io, f"{data_row["prompt"]}\n\n{data_row["canonical_solution"]}")
-            self.run_details["additional_io_correctness"] = passed
-            if not passed and self.verbose >= VERBOSE_FULL:
-                print("Problem in additional IO or canonical solution")
+                # Applying intersection for self-consistancy
+                if additional_io is None:
+                    additional_io = set(self.parse_test_cases(
+                        test_cases=additional_io_response
+                    ))
+                else:
+                    additional_io_ = self.parse_test_cases(
+                        test_cases=additional_io_response
+                    )
+                    additional_io = additional_io.intersection(set(additional_io_))
 
-        # # Forcing no sample io 
-        # self.data_row['sample_io'] = []
-        # else:
-        #     additional_io = []
+            additional_io = list(additional_io)
+            if self.verbose >= VERBOSE_FULL:
+                print(f"Additional IOs:")
+                print(additional_io, flush=True)
+
+            self.run_details["additional_io"] = additional_io
+
+            # # Check whether the additional IO is correct or not
+            # # This block is just for keeping track off the correctness of additional IO
+            # if type(self.data) == HumanDataset:
+            #     passed, _ = evaluate_io(additional_io, f"{data_row["prompt"]}\n\n{data_row["canonical_solution"]}")
+            #     self.run_details["additional_io_correctness"] = passed
+            #     if not passed and self.verbose >= VERBOSE_FULL:
+            #         print("Problem in additional IO or canonical solution")
+
+            # Forcing no sample io 
+            self.data_row['sample_io'] = []
+        else:
+            additional_io = []
 
         code_generation_input = [
             {
@@ -194,7 +196,6 @@ class SCoder(DirectStrategy):
                     problem=problem,
                     language=self.language,
                     std_input_prompt=std_input_prompt,
-                    additional_io="\n".join(additional_io),
                 ),
             },
         ]
@@ -302,7 +303,6 @@ class SCoder(DirectStrategy):
                         problem_with_planning=problem_with_planning,
                         language=self.language,
                         std_input_prompt=std_input_prompt,
-                        additional_io="\n".join(additional_io),
                     )
                 }
             ]
@@ -432,9 +432,6 @@ Follow the following instructions while generating test cases:
 
 prompt_for_initial_code_generation = """{problem}
 
-### Test cases to be considered while generating code
-{additional_io} 
-
 ---
 Important Instructions:
 - Generate {language} code to solve the above mentioned problem.
@@ -518,9 +515,6 @@ prompt_for_code_generation = """You are a programmer tasked with solving a given
 ---
 
 {problem_with_planning}
-
-### Test cases to be considered while generating code
-{additional_io} 
 
 ---
 
