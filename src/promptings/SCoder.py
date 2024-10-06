@@ -256,7 +256,7 @@ class SCoder(DirectStrategy):
             if "### Plan" not in response:
                 plan = f"### Plan\n\n{response}"
             else:
-                plan = response[response.find("### Plan"):]
+                plan = response[response.rfind("### Plan"):]
 
             problem_with_planning = f"## Problem:\n{problem}\n\n{plan}"
 
@@ -459,15 +459,19 @@ Your response should be structured as follows:
 
 ### Problem Understanding
 
-[Think about the original problem. Develop an initial understanding about the problem.]
+Think about the original problem. Develop an initial understanding about the problem.
 
 ### Recall Example Problem
 
-[Recalling a relevant programming problem, it's solution and plan to solve it.]
+Recall a relevant and distinct problems (different from problem mentioned above) and
+- describe it
+- generate {language} code step by step to solve that problem
+- finally generate a planning to solve that problem
 
 ### Plan
 
-[Write down a detailed, step-by-step plan to solve the problem. Ensure each step logically follows from the previous one.]
+- Write down a detailed, step-by-step plan to solve the **original problem**.
+- Ensure each step logically follows from the previous one.
 
 ---
 
@@ -492,11 +496,13 @@ Your response should be structured as follows:
 
 ### Simulation
 
-[Take a sample input and apply plan step by step to get the output. Compare the generated output with the sample output to verify if your plan works as expected.]
+- Take a sample input and apply plan step by step to get the output.
+- Compare the generated output with the sample output to verify if your plan works as expected.]
 
 ### Plan Evaluation
 
-[If the simulation is successful write **No Need to Modify Plan**. Otherwise write **Plan Modification Needed**.]
+- If the simulation is successful write **No Need to Modify Plan**.
+- Otherwise write **Plan Modification Needed**.
 
 ---
 
@@ -523,7 +529,7 @@ prompt_for_code_generation = """You are a programmer tasked with solving a given
 ### {language} Code
 
 ```{language}
-[Your code implementing the plan, with comments explaining each step.]
+# Your code implementing the plan, with comments explaining each step.
 ```
 
 ---
@@ -554,12 +560,12 @@ Your response should be structured as follows:
 
 ### Debugging Notes
 
-[Write any discrepancies or deviations from the plan in previous code generation.]
+Write any discrepancies or deviations from the plan in previous code generation.
 
 ### Modified Code
 
 ```{language}
-[Your corrected code, with comments explaining each correction.]
+# Your corrected code, with comments explaining each correction.
 ```
 
 ---
