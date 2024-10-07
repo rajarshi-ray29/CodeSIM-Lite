@@ -41,7 +41,7 @@ class GPTV1Base(OpenAIModel):
 
         self.temperature = kwargs.get("temperature", 0.20)
         self.top_p = kwargs.get("top_p", 0.10)
-        self.max_tokens = kwargs.get("max_tokens", 8192)
+        self.max_tokens = kwargs.get("max_tokens", 4096)
 
         self.sleep_time = sleep_time
     
