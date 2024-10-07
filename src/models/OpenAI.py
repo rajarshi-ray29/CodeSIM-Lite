@@ -215,6 +215,17 @@ class GPT4o(GPTV2Base):
         super().__init__(model=gpt4o, **kwargs)
 
 
+class GPT4o2(GPTV2Base):
+    def __init__(self, **kwargs):
+        super().__init__(model=gpt4o2, **kwargs)
+
+
+class GPT4o3(GPTV2Base):
+    def __init__(self, **kwargs):
+        super().__init__(model=gpt4o3, **kwargs)
+
+
+
 class GPT4T(GPTV2Base):
     
     def __init__(self, **kwargs):

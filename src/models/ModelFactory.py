@@ -5,6 +5,8 @@ from models.OpenAI import ChatGPT3
 from models.OpenAI import GPT4
 from models.OpenAI import GPT4T
 from models.OpenAI import GPT4o
+from models.OpenAI import GPT4o2
+from models.OpenAI import GPT4o3
 
 
 class ModelFactory:
@@ -23,6 +25,10 @@ class ModelFactory:
             return GPT4T
         elif model_name == "gpt4o":
             return GPT4o
+        elif model_name == "gpt4o2":
+            return GPT4o2
+        elif model_name == "gpt4o3":
+            return GPT4o3
         elif model_name == "openai":
             return OpenAIModel
         else:
