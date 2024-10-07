@@ -18,3 +18,5 @@ costing.csv
 src/models/openaiapi.py
 
 *.bat
+
+temp.bat
