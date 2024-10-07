@@ -468,6 +468,7 @@ prompt_for_initial_code_generation = """{problem}
 --------
 Important Instructions:
 - Generate {language} code step-by-step to solve the above mentioned problem.
+- Do not generate any explanation.
 - The generated **{language}** code must be enclosed within triple backticks (```).
 {std_input_prompt}"""
 
@@ -487,7 +488,9 @@ prompt_for_code_validation = """You are a tester tasked with checking a code for
 ---
 
 **Your output must follow the steps below:**
-- Try to generate a test case other than the sample test cases provided in the problem and show how the code fails in that test case.
+- Try to generate a test case other than the sample test cases that are mentioned inside the problem.
+- Take a the input and apply the code step by step to get the output.
+- Compare the generated output with the expected output to verify if the generated code is ok or not.
 - Write **Buggy Code** if you find such a test case otherwise write **Code is ok**.
 """
 
