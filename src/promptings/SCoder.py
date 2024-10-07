@@ -191,74 +191,7 @@ class SCoder(DirectStrategy):
         
         self.run_details["additional_io"] = additional_io
 
-        code_generation_input = [
-            {
-                "role": "user",
-                "content": prompt_for_initial_code_generation.format(
-                    problem=problem,
-                    language=self.language,
-                    std_input_prompt=std_input_prompt,
-                ),
-            },
-        ]
-
-        if self.verbose >= VERBOSE_FULL:
-            print("\n\n" + "_" * 70)
-            print(f"Input for Code Generation: ")
-            print(code_generation_input[0]['content'], flush=True)
-
-        response = self.gpt_chat(
-            processed_input=code_generation_input
-        )
-
-        if self.verbose >= VERBOSE_FULL:
-            print("\n\n" + "_" * 70)
-            print(f"Response from Code Generation:")
-            print(response, flush=True)
-
-        code = parse_response(response)
-
-        passed, test_log = self.check(data_row, additional_io, code)
-
-        # Early closing for easily solvable problems so that no extra token consumption
-        if passed:
-            # Code Validation using another prompt
-            # This phase is required because sample IO is not complete set of full test cases
-            # Code Validation Phase
-            input_for_code_validation = [
-                {
-                    "role": "user",
-                    "content": prompt_for_code_validation.format(
-                        problem=problem,
-                        code=code,
-                    )
-                },
-            ]
-
-            if self.verbose >= VERBOSE_FULL:
-                print("\n\n" + "_" * 70)
-                print(f"Input for Code Validation: \n\n")
-                print(input_for_code_validation[0]['content'], flush=True)
-
-            response = self.gpt_chat(
-                processed_input=input_for_code_validation
-            )
-
-            if self.verbose >= VERBOSE_FULL:
-                print("\n\n" + "_" * 70)
-                print(f"Input for Code Validation: \n\n")
-                print(response, flush=True)
-
-            if "Buggy Code" in response and \
-                "Code is ok" not in response:
-                if self.verbose >= VERBOSE_FULL:
-                    print("\n\n" + "_" * 70)
-                    print(f"**Sample I/O passed but Code is buggy.**\n")
-                    self.run_details["incomplete_sample_io"] = True
-            else:
-                self.run_details["incomplete_sample_io"] = False
-                return code
-
+        
         # Planning, Coding, Debugging
         for plan_no in range(1, self.max_plan_try + 1):
             # Planning Phase
