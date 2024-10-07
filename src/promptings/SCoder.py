@@ -12,6 +12,7 @@ import xml.etree.ElementTree as ET
 from .Base import BaseStrategy
 from .Direct import DirectStrategy
 from models.Base import BaseModel
+from models.OpenAI import GPT4
 
 from datasets.Dataset import Dataset
 from datasets.APPSDataset import APPSDataset
@@ -28,7 +29,7 @@ from constants.verboseType import *
 class SCoder(DirectStrategy):
     def __init__(
         self,
-        additional_info_run=3,
+        additional_info_run=2,
         max_plan_try=5,
         max_debug_try=5,
         *args,
@@ -92,6 +93,7 @@ class SCoder(DirectStrategy):
         )
 
         passed_additional, test_log_additional = self.data.evaluate_additional_io(
+            data_row[self.data.id_key],
             additional_io,
             code,
             self.language
@@ -176,16 +178,16 @@ class SCoder(DirectStrategy):
 
             self.run_details["additional_io"] = additional_io
 
-            # # Check whether the additional IO is correct or not
-            # # This block is just for keeping track off the correctness of additional IO
-            # if type(self.data) == HumanDataset:
-            #     passed, _ = evaluate_io(additional_io, f"{data_row["prompt"]}\n\n{data_row["canonical_solution"]}")
-            #     self.run_details["additional_io_correctness"] = passed
-            #     if not passed and self.verbose >= VERBOSE_FULL:
-            #         print("Problem in additional IO or canonical solution")
+            # Check whether the additional IO is correct or not
+            # This block is just for keeping track off the correctness of additional IO
+            if type(self.data) == HumanDataset or type(self.data) == MBPPDataset:
+                passed, _ = evaluate_io(additional_io, f"{data_row["prompt"]}\n\n{data_row["canonical_solution"]}")
+                self.run_details["additional_io_correctness"] = passed
+                if not passed and self.verbose >= VERBOSE_FULL:
+                    print("Problem in additional IO or canonical solution")
 
             # Forcing no sample io 
-            self.data_row['sample_io'] = []
+            # self.data_row['sample_io'] = []
         else:
             additional_io = []
 
@@ -494,7 +496,7 @@ Your response should be structured as follows:
 ### Simulation
 
 - Take a sample input and apply plan step by step to get the output.
-- Compare the generated output with the sample output to verify if your plan works as expected.]
+- Compare the generated output with the sample output to verify if your plan works as expected.
 
 ### Plan Evaluation
 
