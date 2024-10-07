@@ -176,8 +176,6 @@ class SCoder(DirectStrategy):
                 print(f"Additional IOs:")
                 print(additional_io, flush=True)
 
-            self.run_details["additional_io"] = additional_io
-
             # Check whether the additional IO is correct or not
             # This block is just for keeping track off the correctness of additional IO
             if type(self.data) == HumanDataset or type(self.data) == MBPPDataset:
@@ -190,6 +188,8 @@ class SCoder(DirectStrategy):
             # self.data_row['sample_io'] = []
         else:
             additional_io = []
+        
+        self.run_details["additional_io"] = additional_io
 
         code_generation_input = [
             {
@@ -222,7 +222,42 @@ class SCoder(DirectStrategy):
 
         # Early closing for easily solvable problems so that no extra token consumption
         if passed:
-            return code
+            # Code Validation using another prompt
+            # This phase is required because sample IO is not complete set of full test cases
+            # Code Validation Phase
+            input_for_code_validation = [
+                {
+                    "role": "user",
+                    "content": prompt_for_code_validation.format(
+                        problem=problem,
+                        code=code,
+                    )
+                },
+            ]
+
+            if self.verbose >= VERBOSE_FULL:
+                print("\n\n" + "_" * 70)
+                print(f"Input for Code Validation: \n\n")
+                print(input_for_code_validation[0]['content'], flush=True)
+
+            response = self.gpt_chat(
+                processed_input=input_for_code_validation
+            )
+
+            if self.verbose >= VERBOSE_FULL:
+                print("\n\n" + "_" * 70)
+                print(f"Input for Code Validation: \n\n")
+                print(response, flush=True)
+
+            if "Buggy Code" in response and \
+                "Code is ok" not in response:
+                if self.verbose >= VERBOSE_FULL:
+                    print("\n\n" + "_" * 70)
+                    print(f"**Sample I/O passed but Code is buggy.**\n")
+                    self.run_details["incomplete_sample_io"] = True
+            else:
+                self.run_details["incomplete_sample_io"] = False
+                return code
 
         # Planning, Coding, Debugging
         for plan_no in range(1, self.max_plan_try + 1):
@@ -294,7 +329,10 @@ class SCoder(DirectStrategy):
                 if self.verbose >= VERBOSE_FULL:
                     print("\n\n" + "_" * 70)
                     print(f"**Plan Modification Needed. Skipping Rest.**\n")
+                    self.run_details["plan_modified"] = True
                 continue
+            else:
+                self.run_details["plan_modified"] = False
 
 
             # Code generation
@@ -380,11 +418,8 @@ class SCoder(DirectStrategy):
 
 prompt_for_additional_io = """You are a tester tasked with creating comprehensive unit test cases for a given programming problem.
 
----
-
 ## Example Problem
 
-```python
 def maximum_segments(n, a, b, c):
     '''
     Write a Python function to find the maximum number of segments of lengths a, b, and c
@@ -393,16 +428,15 @@ def maximum_segments(n, a, b, c):
     For Example:
     assert maximum_segments(7, 5, 2, 5) == 2
     '''
-```
 
 ```
-# Test Cases
-## Basic Test Cases:
+### Test Cases
+#### Basic Test Cases:
 assert maximum_segments(7, 5, 2, 5) == 2
 assert maximum_segments(17, 2, 1, 3) == 17
 assert maximum_segments(18, 16, 3, 6) == 6
 
-## Edge Test Cases:
+#### Edge Test Cases:
 assert maximum_segments(11, 8, 4, 9) == -1
 assert maximum_segments(5, 9, 6, 10) == -1
 ```
@@ -411,15 +445,12 @@ assert maximum_segments(5, 9, 6, 10) == -1
 
 ## Problem
 
-```python
 {problem}
-```
 
----
 
-## Test Cases
+### Test Cases
 
-Follow the following instructions while generating test cases:
+Must follow the following instructions while generating test cases:
 
     - Read and comprehend the programming problem provided. 
     - Create unit test cases that cover both **Normal** and **Edge** case scenarios to ensure the correctness of the code.
@@ -434,27 +465,41 @@ Follow the following instructions while generating test cases:
 
 prompt_for_initial_code_generation = """{problem}
 
----
+--------
 Important Instructions:
-- Generate {language} code to solve the above mentioned problem.
+- Generate {language} code step-by-step to solve the above mentioned problem.
 {std_input_prompt}"""
 
 
-prompt_for_planning = """You are a programmer tasked with generating appropriate plan to solve a given problem using the **{language}** programming language.
+prompt_for_code_validation = """You are a tester tasked with checking a code for a given problem. 
 
 ---
 
 ## Problem
 
-```{language}
 {problem}
-```
+
+## Code
+
+{code}
 
 ---
 
+**Your output must follow the steps below:**
+- Try to generate a test case other than the sample test cases provided in the problem and show how the code fails in that test case.
+- Write **Buggy Code** if you find such a test case otherwise write **Code is ok**.
+"""
+
+
+prompt_for_planning = """You are a programmer tasked with generating appropriate plan to solve a given problem using the **{language}** programming language.
+
+## Problem
+
+{problem}
+
 **Expected Output:**
 
-Your response should be structured as follows:
+Your response must be structured as follows:
 
 ### Problem Understanding
 
@@ -472,10 +517,8 @@ Recall a relevant and distinct problems (different from problem mentioned above)
 - Write down a detailed, step-by-step plan to solve the **original problem**.
 - Ensure each step logically follows from the previous one.
 
----
-
+--------
 **Important Instruction:**
-
 - Strictly follow the instructions.
 - Do not generate code.
 """
@@ -483,15 +526,11 @@ Recall a relevant and distinct problems (different from problem mentioned above)
 
 prompt_for_simulation = """You are a programmer tasked with verifying a plan to solve a given problem using the **{language}** programming language.
 
----
-
 {problem_with_planning}
-
----
 
 **Expected Output:**
 
-Your response should be structured as follows:
+Your response must be structured as follows:
 
 ### Simulation
 
@@ -514,24 +553,10 @@ Your response should be structured as follows:
 
 prompt_for_code_generation = """You are a programmer tasked with solving a given problem using the **{language}** programming language. See the plan to solve the plan and implement code to solve it.
 
----
-
 {problem_with_planning}
 
----
-
-**Expected Output:**
-
-### {language} Code
-
-```{language}
-# Your code implementing the plan, with comments explaining each step.
-```
-
----
-
+--------
 **Important Instructions:**
-
 - Do not add any explanation.
 - The generated **{language}** code must be inside a triple backtick (```) code block.
 {std_input_prompt}"""
@@ -542,21 +567,20 @@ prompt_for_debugging = """You are a programmer who has received some code writte
 {problem_with_planning}
 
 ### Buggy Code
+
 {code}
 
 ### Test Report
 
 {test_log}
 
----
-
 **Expected Output:**
 
-Your response should be structured as follows:
+Your response must be structured as follows:
 
 ### Debugging Notes
 
-Write any discrepancies or deviations from the plan in previous code generation.
+Write any discrepancies or deviations from the plan in previous code generation. To detect the bug take the sample input where the generated code failed and go through each step according to the plan. You will get a output that must be different from the expected output. Now, see this simulation and detect the bug.
 
 ### Modified Code
 
@@ -564,10 +588,8 @@ Write any discrepancies or deviations from the plan in previous code generation.
 # Your corrected code, with comments explaining each correction.
 ```
 
----
-
+--------
 **Important Instructions:**
-
 - Strictly follow the instructions.
 - The generated **{language}** code must be enclosed within triple backticks (```).
 {std_input_prompt}"""
