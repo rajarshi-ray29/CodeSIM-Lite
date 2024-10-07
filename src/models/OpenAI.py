@@ -125,6 +125,24 @@ class GPT4(GPTV1Base):
         super().__init__(model=gpt4, sleep_time=0, **kwargs)
 
 
+class GPT42(GPTV1Base):
+    
+    def __init__(self, **kwargs):
+        super().__init__(model=gpt42, sleep_time=0, **kwargs)
+
+
+class GPT43(GPTV1Base):
+    
+    def __init__(self, **kwargs):
+        super().__init__(model=gpt43, sleep_time=0, **kwargs)
+
+
+class GPT44(GPTV1Base):
+    
+    def __init__(self, **kwargs):
+        super().__init__(model=gpt44, sleep_time=0, **kwargs)
+
+
 class GPTV2Base(OpenAIModel):
     def __init__(self, model, sleep_time=60, **kwargs):
         self.model = model
