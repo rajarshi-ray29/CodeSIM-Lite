@@ -40,6 +40,7 @@ class HumanDataset(Dataset):
     
     def evaluate_additional_io(
         self,
+        id: int,
         sample_io: List[str],
         cur_imp: str,
         language: str,

@@ -16,3 +16,5 @@ outputs/*
 costing-old.csv
 costing.csv
 src/models/openaiapi.py
+
+*.bat
