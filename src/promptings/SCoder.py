@@ -468,6 +468,7 @@ prompt_for_initial_code_generation = """{problem}
 --------
 Important Instructions:
 - Generate {language} code step-by-step to solve the above mentioned problem.
+- The generated **{language}** code must be enclosed within triple backticks (```).
 {std_input_prompt}"""
 
 
