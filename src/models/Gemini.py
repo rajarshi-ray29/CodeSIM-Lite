@@ -5,9 +5,9 @@ import dotenv
 import time
 from tenacity import retry, stop_after_attempt, wait_random_exponential
 
-from Base import BaseModel
+from .Base import BaseModel
 
-from geminiapi import api_key
+from .geminiapi import api_key
 
 genai.configure(api_key=api_key)
 model_name="gemini-1.5-flash"
