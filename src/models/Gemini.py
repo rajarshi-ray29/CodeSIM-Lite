@@ -39,7 +39,12 @@ class Gemini(BaseModel):
     
 
     @retry(wait=wait_random_exponential(min=1, max=120), stop=stop_after_attempt(20))
-    def prompt(self, processed_input):
+    def prompt(
+        self, 
+        processed_input, 
+        frequency_penalty=0, 
+        presence_penalty=0
+    ):
         
         time.sleep(self.sleep_time)
 
