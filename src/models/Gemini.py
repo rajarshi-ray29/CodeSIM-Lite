@@ -13,18 +13,22 @@ genai.configure(api_key=api_key)
 model_name="gemini-1.5-flash"
 
 class Gemini(BaseModel):
-    def __init__(self, temperature=0, top_p=0.95, sleep_time=0):
-        genai.configure(api_key=api_key)
+    def __init__(self, sleep_time=0, **kwargs):
+        self.model_name = kwargs.get("model_name", model_name)
+        self.api_key = kwargs.get("api_key", api_key)
+        self.temperature = kwargs.get("temperature", 0.0)
+        self.top_p = kwargs.get("top_p", 0.95)
+        self.max_tokens = kwargs.get("max_tokens", 8192)
         self.sleep_time = sleep_time
-        self.temperature = temperature
-        self.top_p = top_p
+
+        genai.configure(api_key=api_key)
 
         # Create the model
         generation_config = {
             "temperature": self.temperature,
             "top_p": self.top_p,
             "top_k": 64,
-            "max_output_tokens": 8192,
+            "max_output_tokens": self.max_tokens,
             "response_mime_type": "text/plain",
         }
 
@@ -58,7 +62,7 @@ class Gemini(BaseModel):
                     "model_name": model_name,
                     "model_prompt": processed_input,
                     "model_response": response.candidates[0].content.parts[0].text,                    
-                    "max_tokens": 8192,
+                    "max_tokens": self.max_tokens,
                     "temperature": self.temperature,
                     "top_p": self.top_p,
                     "frequency_penalty": 0,
