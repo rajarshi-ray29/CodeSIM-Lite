@@ -17,6 +17,7 @@ costing-old.csv
 costing.csv
 src/models/openaiapi.py
 src/models/geminiapi.py
+src/models/groqapi.py
 
 *.bat
 
