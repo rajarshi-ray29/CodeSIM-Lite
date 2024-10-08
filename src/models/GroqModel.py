@@ -77,11 +77,11 @@ class LLaMa38B(GroqModel):
     def __init__(self, **kwargs):
         super().__init__(model_name="llama-3.1-8b-instant", **kwargs)
 
-class Mixtral(GroqModel):
+class Mixtral87B(GroqModel):
     def __init__(self, **kwargs):
-        super().__init__(model_name="mixtral-8x7b-32768", **kwargs)
+        super().__init__(model_name="mixtral-8x7b-32768", api_key=api_key_teacher, **kwargs)
 
 class Gemma29B(GroqModel):
     def __init__(self, **kwargs):
-        super().__init__(model_name="gemma2-9b-it", **kwargs)
+        super().__init__(model_name="gemma2-9b-it", api_key=api_key_teacher, **kwargs)
 

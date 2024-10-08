@@ -1,15 +1,6 @@
-from models.Gemini import Gemini
-from models.OpenAI import OpenAIModel
-from models.OpenAI import ChatGPT
-from models.OpenAI import ChatGPT3
-from models.OpenAI import GPT4
-from models.OpenAI import GPT42
-from models.OpenAI import GPT43
-from models.OpenAI import GPT44
-from models.OpenAI import GPT4T
-from models.OpenAI import GPT4o
-from models.OpenAI import GPT4o2
-from models.OpenAI import GPT4o3
+from models.Gemini import *
+from models.OpenAI import *
+from models.GroqModel import *
 
 
 class ModelFactory:
@@ -18,6 +9,14 @@ class ModelFactory:
         model_name = model_name.lower()
         if model_name == "gemini":
             return Gemini
+        if model_name == "llama70B":
+            return LLaMa370B
+        if model_name == "llama8B":
+            return LLaMa38B
+        if model_name == "mixtral":
+            return Mixtral87B
+        if model_name == "gemma":
+            return Gemma29B
         elif model_name == "chatgpt":
             return ChatGPT
         elif model_name == "chatgpt3":

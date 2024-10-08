@@ -65,6 +65,10 @@ parser.add_argument(
         "GPT4o2",
         "GPT4o3",
         "Gemini",
+        "LLaMa8B",
+        "LLaMa70B",
+        "Mixtral",
+        "Gemma",
         "OpenAI",
     ]
 )
