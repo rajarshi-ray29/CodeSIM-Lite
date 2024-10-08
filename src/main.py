@@ -71,12 +71,12 @@ parser.add_argument(
 parser.add_argument(
     "--temperature",
     type=float,
-    default=0.20
+    default=0
 )
 parser.add_argument(
     "--top_p",
     type=float,
-    default=0.10
+    default=0.95
 )
 parser.add_argument(
     "--pass_at_k",
