@@ -231,7 +231,6 @@ class SCoder(DirectStrategy):
 
             problem_with_planning = f"## Problem:\n{problem}\n\n{plan}"
 
-
             # Simulation Phase
             input_for_simulation = [
                 {
@@ -261,12 +260,35 @@ class SCoder(DirectStrategy):
                 "No Plan Modification Needed" not in response:
                 if self.verbose >= VERBOSE_FULL:
                     print("\n\n" + "_" * 70)
-                    print(f"**Plan Modification Needed. Skipping Rest.**\n")
-                    self.run_details["plan_modified"] = True
-                continue
-            else:
-                self.run_details["plan_modified"] = False
+                    print(f"**Plan Modification Needed.**\n")
+                
+                # Plan Refinement Phase
+                input_for_plan_refinement = [
+                    {
+                        "role": "user",
+                        "content": prompt_for_plan_refinement.format(
+                            problem_with_planning=problem_with_planning,
+                            language=self.language,
+                            critique=response
+                        )
+                    },
+                ]
 
+                if self.verbose >= VERBOSE_FULL:
+                    print("\n\n" + "_" * 70)
+                    print(f"Input for Plan Refinement: {plan_no}\n\n")
+                    print(input_for_plan_refinement[0]['content'], flush=True)
+
+                plan = self.gpt_chat(
+                    processed_input=input_for_simulation
+                )
+
+                if self.verbose >= VERBOSE_FULL:
+                    print("\n\n" + "_" * 70)
+                    print(f"Response from Plan Refinement: {plan_no}\n\n")
+                    print(plan, flush=True)
+                
+                problem_with_planning = f"## Problem:\n{problem}\n\n{plan}"
 
             # Code generation
             input_for_final_code_generation = [
@@ -486,6 +508,28 @@ Your response must be structured as follows:
 - Strictly follow the instructions.
 - Do not generate code.
 """
+
+
+prompt_for_plan_refinement = """You are a programmer tasked with generating appropriate plan to solve a given problem using the **{language}** programming language. You already have a wrong plan. Correct it so that it can generate correct code.
+
+{problem_with_planning}
+
+## Plan Critique
+
+{critique}
+
+## New Plan
+
+- Write down a detailed, step-by-step modified plan to solve the **original problem**.
+- Ensure each step logically follows from the previous one.
+
+--------
+**Important Instruction:**
+- Your response must contain only the plan.
+- Do not add any explanation.
+- Do not generate code.
+"""
+
 
 
 prompt_for_code_generation = """You are a programmer tasked with solving a given problem using the **{language}** programming language. See the plan to solve the plan and implement code to solve it.
