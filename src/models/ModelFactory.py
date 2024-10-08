@@ -9,9 +9,9 @@ class ModelFactory:
         model_name = model_name.lower()
         if model_name == "gemini":
             return Gemini
-        if model_name == "llama70B":
+        if model_name == "llama70b":
             return LLaMa370B
-        if model_name == "llama8B":
+        if model_name == "llama8b":
             return LLaMa38B
         if model_name == "mixtral":
             return Mixtral87B
