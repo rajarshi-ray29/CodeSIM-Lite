@@ -55,6 +55,7 @@ parser.add_argument(
     default="ChatGPT",
     choices=[
         "ChatGPT",
+        "ChatGPT2",
         "ChatGPT3",
         "GPT4",
         "GPT42",

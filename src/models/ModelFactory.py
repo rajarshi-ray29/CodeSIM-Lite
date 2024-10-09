@@ -19,6 +19,8 @@ class ModelFactory:
             return Gemma29B
         elif model_name == "chatgpt":
             return ChatGPT
+        elif model_name == "chatgpt2":
+            return ChatGPT2
         elif model_name == "chatgpt3":
             return ChatGPT3
         elif model_name == "gpt4":
