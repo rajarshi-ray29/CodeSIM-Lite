@@ -69,7 +69,7 @@ class SCoder(DirectStrategy):
             if test_log.startswith("Failed"):
                 falied_test_cases.append(test_log[test_log.index("assert"):])
         
-        return f"Passed Test Cases:\n{"\n".join(passed_test_cases)}\n\nFailed Test Cases:\n{"\n".join(falied_test_cases)}"
+        return f"Test Cases where the generated code failed to generate the expected output:\n{"\n".join(falied_test_cases)}"
 
 
     def parse_test_cases(self, test_cases: str):
@@ -101,19 +101,6 @@ class SCoder(DirectStrategy):
 
         return passed_sample & passed_additional, self.process_test_log(test_log_sample + test_log_additional)
     
-
-    @staticmethod
-    def process_test_log(test_logs: str):
-        passed_test_cases = []
-        falied_test_cases = []
-        for test_log in test_logs.splitlines():
-            if test_log.startswith("Passed"):
-                passed_test_cases.append(test_log[test_log.index("assert"):])
-            if test_log.startswith("Failed"):
-                falied_test_cases.append(test_log[test_log.index("assert"):])
-        
-        return f"Passed Test Cases:\n{"\n".join(passed_test_cases)}\n\nFailed Test Cases:\n{"\n".join(falied_test_cases)}"
-
 
     def run_single_pass(self, data_row: dict):
         print("", flush=True)
@@ -474,7 +461,6 @@ Recall a relevant and distinct problems (different from problem mentioned above)
 ### Plan
 
 - Write down a detailed, step-by-step plan to solve the **original problem**.
-- Ensure each step logically follows from the previous one.
 
 --------
 **Important Instruction:**
@@ -543,7 +529,7 @@ prompt_for_code_generation = """You are a programmer tasked with solving a given
 {std_input_prompt}"""
 
 
-prompt_for_debugging = """You are a programmer who has received some code written in **{language}** that fails to pass certain test cases. Your task is to modify the code in such a way so that it can pass all the test cases.
+prompt_for_debugging = """You are a programmer who has received a solution of a problem written in **{language}** that fails to pass certain test cases. Your task is to modify the code in such a way so that it can pass all the test cases. Do not generate same code.
 
 {problem_with_planning}
 
@@ -555,13 +541,18 @@ prompt_for_debugging = """You are a programmer who has received some code writte
 
 {test_log}
 
-**Expected Output:**
-
-Your response must be structured as follows:
+### Simulation with failed test case
+To detect where is the bug:
+    - Take a sample test case where it fails.
+    - Take the input go through each step according to the plan
+    - You will get a output that must be different from the expected output. 
 
 ### Debugging Notes
+Based on this simulation detect any of the following cases:
+    - Plan is wrong
+    - Plan is correct but plan to code generation is wrong.
 
-Write any discrepancies or deviations from the plan in previous code generation. To detect the bug take the sample input where the generated code failed and go through each step according to the plan. You will get a output that must be different from the expected output. Now, see this simulation and detect the bug.
+- Finally, discuss how to correct this code.
 
 ### Modified Code
 
@@ -572,6 +563,8 @@ Write any discrepancies or deviations from the plan in previous code generation.
 --------
 **Important Instructions:**
 - Strictly follow the instructions.
-- The generated **{language}** code must be enclosed within triple backticks (```).
+- Do not add testing code for example assert statement in your code.
+- Do not be overconfident that the generated code is correct. It is wrong.
+- The modified **{language}** code must be enclosed within triple backticks (```).
 {std_input_prompt}"""
 
