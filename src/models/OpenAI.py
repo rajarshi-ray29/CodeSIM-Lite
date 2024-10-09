@@ -54,8 +54,6 @@ class GPTV1Base(OpenAIModel):
         presence_penalty=0
     ):
         
-        global total_cost
-
         time.sleep(self.sleep_time)
 
         start_time = time.perf_counter()
@@ -81,7 +79,7 @@ class GPTV1Base(OpenAIModel):
                  response.usage.completion_tokens) / 1e6
 
         with open(cost_log_file_path, mode="a") as file:
-            file.write(f"{self.model["name"]},{response.usage.prompt_tokens},{response.usage.completion_tokens},{cost}\n")
+            file.write(f'{self.model["name"]},{response.usage.prompt_tokens},{response.usage.completion_tokens},{cost}\n')
         
         run_details = {
             "api_calls": 1,
@@ -167,7 +165,6 @@ class GPTV2Base(OpenAIModel):
         frequency_penalty=0, 
         presence_penalty=0
     ):
-        global total_cost
 
         time.sleep(self.sleep_time)
 
@@ -201,7 +198,7 @@ class GPTV2Base(OpenAIModel):
                  response["usage"]["completion_tokens"]) / 1e6
 
         with open(cost_log_file_path, mode="a") as file:
-            file.write(f"{self.model["name"]},{response["usage"]["prompt_tokens"]},{response["usage"]["completion_tokens"]},{cost}\n")
+            file.write(f'{self.model["name"]},{response["usage"]["prompt_tokens"]},{response["usage"]["completion_tokens"]},{cost}\n')
 
         run_details = {
             "api_calls": 1,
