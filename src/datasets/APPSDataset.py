@@ -1,3 +1,4 @@
+from typing import List
 from .Dataset import Dataset
 from evaluations.evalute import contest_evaluate, contest_evaluate_public_tests
 from constants.paths import *
@@ -36,6 +37,24 @@ class APPSDataset(Dataset):
             generated_code=cur_imp,
             id=item["id"],
             tests=item["sample_io"],
+            lang=language
+        )
+    
+    def evaluate_additional_io(
+        self,
+        id: int,
+        tests: List[str],
+        cur_imp: str,
+        language: str,
+    ):
+        
+        if tests == []:
+            return True, ''
+        
+        return contest_evaluate_public_tests(
+            generated_code=cur_imp,
+            id=id,
+            tests=tests,
             lang=language
         )
 

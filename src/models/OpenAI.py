@@ -246,6 +246,11 @@ class GPT4o3(GPTV2Base):
         super().__init__(model=gpt4o3, **kwargs)
 
 
+class GPT4ol(GPTV2Base):
+    def __init__(self, **kwargs):
+        super().__init__(model=gpt4ol, **kwargs)
+
+
 
 class GPT4T(GPTV2Base):
     

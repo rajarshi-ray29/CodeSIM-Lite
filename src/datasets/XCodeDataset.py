@@ -1,3 +1,4 @@
+from typing import List
 from .Dataset import Dataset
 from evaluations.evalute import xcode_evaluate, contest_evaluate_public_tests
 from constants.paths import *
@@ -42,6 +43,24 @@ class XCodeDataset(Dataset):
         return xcode_evaluate(
             generated_code=cur_imp,
             src_uid=item["src_uid"],
+            lang=language
+        )
+    
+    def evaluate_additional_io(
+        self,
+        id: int,
+        tests: List[str],
+        cur_imp: str,
+        language: str,
+    ):
+        
+        if tests == []:
+            return True, ''
+        
+        return contest_evaluate_public_tests(
+            generated_code=cur_imp,
+            id=id,
+            tests=tests,
             lang=language
         )
 

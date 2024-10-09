@@ -39,6 +39,8 @@ class ModelFactory:
             return GPT4o2
         elif model_name == "gpt4o3":
             return GPT4o3
+        elif model_name == "gpt4ol":
+            return GPT4ol
         elif model_name == "openai":
             return OpenAIModel
         else:
