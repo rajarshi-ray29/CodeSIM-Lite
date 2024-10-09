@@ -111,6 +111,12 @@ class ChatGPT(GPTV1Base):
         super().__init__(model=chatgpt, sleep_time=0, **kwargs)
 
 
+class ChatGPT2(GPTV1Base):
+    def __init__(self, **kwargs):
+        super().__init__(model=chatgpt2, sleep_time=0, **kwargs)
+
+
+
 class ChatGPT3(GPTV1Base):
     def __init__(self, **kwargs):
         super().__init__(model=chatgpt3, sleep_time=0, **kwargs)
