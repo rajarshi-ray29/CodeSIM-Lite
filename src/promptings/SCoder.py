@@ -76,7 +76,7 @@ class SCoder(DirectStrategy):
         return [
             test_case
             for test_case in test_cases.splitlines()
-            if len(test_case) > 0 and not test_case.startswith("#")
+            if len(test_case) > 0 and test_case.startswith("assert")
         ]
 
 
