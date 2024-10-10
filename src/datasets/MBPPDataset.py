@@ -1,3 +1,4 @@
+from typing import List
 from .Dataset import Dataset
 from evaluations.func_evaluate import evaluate_io, evaluate_functional_correctness
 from constants.paths import *
@@ -40,6 +41,22 @@ class MBPPDataset(Dataset):
             sample_io=item["sample_io"],
             completion=cur_imp,
         )
+
+    def evaluate_additional_io(
+        self,
+        id: int,
+        io: List[str],
+        cur_imp: str,
+        language: str,
+    ):
+        if len(io) == 0:
+            return True, ""
+        
+        return evaluate_io(
+            sample_io=io,
+            completion=cur_imp,            
+        )
+
 
     @staticmethod
     def get_prompt(item):

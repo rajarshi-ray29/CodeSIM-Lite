@@ -71,7 +71,7 @@ class GroqModel(BaseModel):
 
 class LLaMa370B(GroqModel):
     def __init__(self, **kwargs):
-        self.api_key = api_key
+        self.api_key = api_key_2
         super().__init__(model_name="llama-3.1-70b-versatile", max_tokens=8192, **kwargs)
 
 class LLaMa38B(GroqModel):
@@ -81,11 +81,11 @@ class LLaMa38B(GroqModel):
 
 class Mixtral87B(GroqModel):
     def __init__(self, **kwargs):
-        self.api_key = api_key_2
+        self.api_key = api_key_3
         super().__init__(model_name="mixtral-8x7b-32768", max_tokens=32768, **kwargs)
 
 class Gemma29B(GroqModel):
     def __init__(self, **kwargs):
-        self.api_key = api_key_4
+        self.api_key = api_key
         super().__init__(model_name="gemma2-9b-it", max_tokens=4096, **kwargs)
 

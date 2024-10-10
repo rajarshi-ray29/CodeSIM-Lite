@@ -125,14 +125,15 @@ class SCoder(DirectStrategy):
                     {
                         "role": "user",
                         "content": prompt_for_additional_io.format(
-                            problem=problem
+                            problem=problem,
+                            problem_name=data_row["entry_point"],
                         ),
                     },
                 ]
 
                 if self.verbose >= VERBOSE_FULL:
                     print("\n\n" + "_" * 70)
-                    print(f"Input for Additional IO Generation: {idx}")
+                    print(f"Input for Additional IO Generation: {idx}\n\n")
                     print(additional_io_generation_input[0]['content'], flush=True)
 
                 response = self.gpt_chat(
@@ -142,7 +143,7 @@ class SCoder(DirectStrategy):
 
                 if self.verbose >= VERBOSE_FULL:
                     print("\n\n" + "_" * 70)
-                    print(f"Response from Additional IO Generation: {idx}")
+                    print(f"Response from Additional IO Generation: {idx}\n\n")
                     print(response, flush=True)
 
                 additional_io_response = parse_response(response)
@@ -164,7 +165,8 @@ class SCoder(DirectStrategy):
                 print(additional_io, flush=True)
 
             # Forcing no sample io as MBPP contains no sample io
-            self.data_row['sample_io'] = []
+            data_row['sample_io'] = []
+
         else:
             additional_io = []
         
@@ -362,16 +364,12 @@ def maximum_segments(n, a, b, c):
 
 ### Problem Understanding
 
-The task is to maximize the number of segments you can cut from a total length `n`, where the possible segment lengths are `a`, `b`, and `c`. The problem is similar to the classic Coin Changing Problem where the task is to determine the highest number of coins that add up to a given amount.
-
+The task is to maximize the number of segments you can cut from a total length `n`, where the possible segment lengths are `a`, `b`, and `c`. Let say we have a rope of length `n` meter. We need to cut it into segments. Possible segment length is `a`, `b`, and `c`. There may be many possible way of doing these segments. We need to find out the maximum number of segments from that rope.
 
 ### Test Cases
-#### Basic Test Cases:
 assert maximum_segments(7, 5, 2, 5) == 2
 assert maximum_segments(17, 2, 1, 3) == 17
 assert maximum_segments(18, 16, 3, 6) == 6
-
-#### Edge Test Cases:
 assert maximum_segments(11, 8, 4, 9) == -1
 assert maximum_segments(5, 9, 6, 10) == -1
 
@@ -381,21 +379,18 @@ assert maximum_segments(5, 9, 6, 10) == -1
 
 {problem}
 
-### Problem Understanding
-
-Fill up this section
-
-### Test Cases
-
-Fill up this section
-
-Must follow the following instructions while generating test cases:
-    - Read and understand the programming problem provided. 
-    - Create unit test cases that cover both **Normal** and **Edge** case scenarios.
-    - Generate three test cases.
-    - Write each test case in a single line.
-    - Your response must contain the generated test cases enclosed within triple backticks (```).
-    - Do not generate code.
+--------
+**Important Instruction:**
+For the problem `{problem_name}`
+    - First, understand the problem `{problem_name}` and write down the understanding inside **Problem Understanding** section. 
+    - Then Generate five (05) unit test cases that cover both:
+        - **Normal** and **Edge** case scenarios
+        - **Positive** and **Negative** case scenarios
+        - **Valid** and **Invalid** case scenarios
+    inside **Test Cases** section.
+    - Write down each test case in a single line following the pattern shown in the example problem.
+    - The generated test cases must be inside a triple backtick (```) code block.
+    - Do not generate any code to solve this problem.
 """
 
 

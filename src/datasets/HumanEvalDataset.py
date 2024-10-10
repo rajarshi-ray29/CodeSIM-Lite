@@ -41,12 +41,15 @@ class HumanDataset(Dataset):
     def evaluate_additional_io(
         self,
         id: int,
-        sample_io: List[str],
+        io: List[str],
         cur_imp: str,
         language: str,
     ):
+        if len(io) == 0:
+            return True, ""
+        
         return evaluate_io(
-            sample_io=sample_io,
+            sample_io=io,
             completion=cur_imp,            
         )
 
