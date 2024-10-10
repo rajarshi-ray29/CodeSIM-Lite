@@ -163,16 +163,8 @@ class SCoder(DirectStrategy):
                 print(f"Additional IOs:")
                 print(additional_io, flush=True)
 
-            # Check whether the additional IO is correct or not
-            # This block is just for keeping track off the correctness of additional IO
-            if type(self.data) == HumanDataset or type(self.data) == MBPPDataset:
-                passed, _ = evaluate_io(additional_io, f"{data_row["prompt"]}\n\n{data_row["canonical_solution"]}")
-                self.run_details["additional_io_correctness"] = passed
-                if not passed and self.verbose >= VERBOSE_FULL:
-                    print("Problem in additional IO or canonical solution")
-
-            # Forcing no sample io 
-            # self.data_row['sample_io'] = []
+            # Forcing no sample io as MBPP contains no sample io
+            self.data_row['sample_io'] = []
         else:
             additional_io = []
         
@@ -360,18 +352,19 @@ class SCoder(DirectStrategy):
 
 prompt_for_additional_io = """You are a tester tasked with creating comprehensive unit test cases for a given programming problem.
 
-## Example Problem
+## Problem
 
 def maximum_segments(n, a, b, c):
     '''
     Write a Python function to find the maximum number of segments of lengths a, b, and c
     that can be formed from n.
-
-    For Example:
-    assert maximum_segments(7, 5, 2, 5) == 2
     '''
 
-```
+### Problem Understanding
+
+The task is to maximize the number of segments you can cut from a total length `n`, where the possible segment lengths are `a`, `b`, and `c`. The problem is similar to the classic Coin Changing Problem where the task is to determine the highest number of coins that add up to a given amount.
+
+
 ### Test Cases
 #### Basic Test Cases:
 assert maximum_segments(7, 5, 2, 5) == 2
@@ -381,7 +374,6 @@ assert maximum_segments(18, 16, 3, 6) == 6
 #### Edge Test Cases:
 assert maximum_segments(11, 8, 4, 9) == -1
 assert maximum_segments(5, 9, 6, 10) == -1
-```
 
 ---
 
@@ -389,19 +381,21 @@ assert maximum_segments(5, 9, 6, 10) == -1
 
 {problem}
 
+### Problem Understanding
+
+Fill up this section
 
 ### Test Cases
 
-Must follow the following instructions while generating test cases:
+Fill up this section
 
-    - Read and comprehend the programming problem provided. 
-    - Create unit test cases that cover both **Normal** and **Edge** case scenarios to ensure the correctness of the code.
-    - Write clean and concise test cases that effectively test the functionality of the code.
-    - Do not generate more than 5 test cases.
-    - Follow the style of the provided example problem while generation.
-        - Write each test case in a single line.
-        - Your response must contain the generated test cases enclosed within triple backticks (```).
-    - **Do not include the test cases that are mentioned in the problem description.**
+Must follow the following instructions while generating test cases:
+    - Read and understand the programming problem provided. 
+    - Create unit test cases that cover both **Normal** and **Edge** case scenarios.
+    - Generate three test cases.
+    - Write each test case in a single line.
+    - Your response must contain the generated test cases enclosed within triple backticks (```).
+    - Do not generate code.
 """
 
 
