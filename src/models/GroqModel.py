@@ -23,6 +23,7 @@ class GroqModel(BaseModel):
         self.top_p = kwargs.get("top_p", 0.95)
         self.max_tokens = kwargs.get("max_tokens", 8192)
         self.sleep_time = sleep_time
+        self.api_key = get_api_key_at_random()
 
         self.client = Groq(api_key=self.api_key)
 
@@ -71,21 +72,17 @@ class GroqModel(BaseModel):
 
 class LLaMa370B(GroqModel):
     def __init__(self, **kwargs):
-        self.api_key = api_key_2
         super().__init__(model_name="llama-3.1-70b-versatile", max_tokens=8192, **kwargs)
 
 class LLaMa38B(GroqModel):
     def __init__(self, **kwargs):
-        self.api_key = api_key
         super().__init__(model_name="llama-3.1-8b-instant", max_tokens=8192, **kwargs)
 
 class Mixtral87B(GroqModel):
     def __init__(self, **kwargs):
-        self.api_key = api_key_3
         super().__init__(model_name="mixtral-8x7b-32768", max_tokens=32768, **kwargs)
 
 class Gemma29B(GroqModel):
     def __init__(self, **kwargs):
-        self.api_key = api_key
         super().__init__(model_name="gemma2-9b-it", max_tokens=4096, **kwargs)
 

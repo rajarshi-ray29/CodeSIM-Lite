@@ -1,7 +1,6 @@
 @echo off
-set retryDelay=10
-set command=python .\src\main.py --strategy SCoder --model ChatGPT
-@REM set command=python .\src\main.py --strategy SelfPlanning --model GPT4T
+set retryDelay=60
+set command=python .\src\main.py --strategy SCoder --model LLaMa8B
 
 :: Activate the Conda environment
 call conda activate scoder
