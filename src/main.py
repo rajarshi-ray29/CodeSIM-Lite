@@ -47,6 +47,7 @@ parser.add_argument(
         "Analogical",
         "MapCoder",
         "SCoder",
+        "SCoderV16",
     ]
 )
 parser.add_argument(
@@ -57,15 +58,18 @@ parser.add_argument(
         "ChatGPT",
         "ChatGPT2",
         "ChatGPT3",
+        "ChatGPT1106",
         "GPT4",
         "GPT42",
         "GPT43",
         "GPT44",
         "GPT4T",
-        "GPT4o",
-        "GPT4o2",
-        "GPT4o3",
         "GPT4ol",
+        "GPT4ol2",
+        "GPT4ol3",
+        "GPT4ol4",
+        "GPT4ol5",
+        "GPT4ol6",
         "Gemini",
         "LLaMa8B",
         "LLaMa70B",
@@ -160,7 +164,9 @@ RESULT_LOG_MODE = args.result_log
 VERBOSE = int(args.verbose)
 STORE_LOG_IN_FILE = args.store_log_in_file
 
-RUN_NAME = f"results/{DATASET}/{STRATEGY}/{MODEL_NAME}/{LANGUAGE}-{TEMPERATURE}-{TOP_P}-{PASS_AT_K}"
+MODEL_NAME_FOR_RUN = MODEL_NAME[:-1] + ('' if MODEL_NAME[-1].isdigit() else MODEL_NAME[-1])
+
+RUN_NAME = f"results/{DATASET}/{STRATEGY}/{MODEL_NAME_FOR_RUN}/{LANGUAGE}-{TEMPERATURE}-{TOP_P}-{PASS_AT_K}"
 
 run_no = 1
 while os.path.exists(f"{RUN_NAME}/Run-{run_no}"):

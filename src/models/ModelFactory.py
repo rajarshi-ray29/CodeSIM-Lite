@@ -23,6 +23,8 @@ class ModelFactory:
             return ChatGPT2
         elif model_name == "chatgpt3":
             return ChatGPT3
+        elif model_name == "chatgpt1106":
+            return ChatGPT1106
         elif model_name == "gpt4":
             return GPT4
         elif model_name == "gpt42":
@@ -33,14 +35,18 @@ class ModelFactory:
             return GPT44
         elif model_name == "gpt4t":
             return GPT4T
-        elif model_name == "gpt4o":
-            return GPT4o
-        elif model_name == "gpt4o2":
-            return GPT4o2
-        elif model_name == "gpt4o3":
-            return GPT4o3
         elif model_name == "gpt4ol":
             return GPT4ol
+        elif model_name == "gpt4ol2":
+            return GPT4ol2
+        elif model_name == "gpt4ol3":
+            return GPT4ol3
+        elif model_name == "gpt4ol4":
+            return GPT4ol4
+        elif model_name == "gpt4ol5":
+            return GPT4ol5
+        elif model_name == "gpt4ol6":
+            return GPT4ol6
         elif model_name == "openai":
             return OpenAIModel
         else:

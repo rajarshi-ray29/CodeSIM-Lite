@@ -122,6 +122,11 @@ class ChatGPT3(GPTV1Base):
         super().__init__(model=chatgpt3, sleep_time=0, **kwargs)
 
 
+class ChatGPT1106(GPTV1Base):
+    def __init__(self, **kwargs):
+        super().__init__(model=chatgpt1106, sleep_time=0, **kwargs)
+
+
 
 class GPT4(GPTV1Base):
     
@@ -231,24 +236,35 @@ class GPTV2Base(OpenAIModel):
         return response["choices"][0]["message"]["content"], run_details
 
 
-class GPT4o(GPTV2Base):
+class GPT4ol4(GPTV2Base):
     def __init__(self, **kwargs):
         super().__init__(model=gpt4o, **kwargs)
 
 
-class GPT4o2(GPTV2Base):
+class GPT4ol5(GPTV2Base):
     def __init__(self, **kwargs):
         super().__init__(model=gpt4o2, **kwargs)
 
 
-class GPT4o3(GPTV2Base):
+class GPT4ol6(GPTV2Base):
     def __init__(self, **kwargs):
         super().__init__(model=gpt4o3, **kwargs)
 
 
 class GPT4ol(GPTV2Base):
     def __init__(self, **kwargs):
-        super().__init__(model=gpt4ol, **kwargs)
+        super().__init__(model=gpt4ol, sleep_time=30, **kwargs)
+
+
+class GPT4ol2(GPTV2Base):
+    def __init__(self, **kwargs):
+        super().__init__(model=gpt4ol2, sleep_time=30, **kwargs)
+
+
+class GPT4ol3(GPTV2Base):
+    def __init__(self, **kwargs):
+        super().__init__(model=gpt4ol3, sleep_time=30, **kwargs)
+
 
 
 

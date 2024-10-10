@@ -17,14 +17,14 @@ from groq import Groq
 
 class GroqModel(BaseModel):
     def __init__(self, sleep_time=0, **kwargs):
+        print(kwargs)
         self.model_name = kwargs.get("model_name", "llama3-8b-8192")
-        self.api_key = kwargs.get("api_key", api_key)
         self.temperature = kwargs.get("temperature", 0.0)
         self.top_p = kwargs.get("top_p", 0.95)
-        self.max_tokens = kwargs.get("max_tokens", 4096)
+        self.max_tokens = kwargs.get("max_tokens", 8192)
         self.sleep_time = sleep_time
 
-        self.client = Groq(api_key=api_key)
+        self.client = Groq(api_key=self.api_key)
 
     def prompt(
         self,
@@ -71,17 +71,21 @@ class GroqModel(BaseModel):
 
 class LLaMa370B(GroqModel):
     def __init__(self, **kwargs):
-        super().__init__(model_name="llama-3.1-70b-versatile", **kwargs)
+        self.api_key = api_key
+        super().__init__(model_name="llama-3.1-70b-versatile", max_tokens=8192, **kwargs)
 
 class LLaMa38B(GroqModel):
     def __init__(self, **kwargs):
-        super().__init__(model_name="llama-3.1-8b-instant", **kwargs)
+        self.api_key = api_key
+        super().__init__(model_name="llama-3.1-8b-instant", max_tokens=8192, **kwargs)
 
 class Mixtral87B(GroqModel):
     def __init__(self, **kwargs):
-        super().__init__(model_name="mixtral-8x7b-32768", **kwargs)
+        self.api_key = api_key_2
+        super().__init__(model_name="mixtral-8x7b-32768", max_tokens=32768, **kwargs)
 
 class Gemma29B(GroqModel):
     def __init__(self, **kwargs):
-        super().__init__(model_name="gemma2-9b-it", **kwargs)
+        self.api_key = api_key_4
+        super().__init__(model_name="gemma2-9b-it", max_tokens=4096, **kwargs)
 

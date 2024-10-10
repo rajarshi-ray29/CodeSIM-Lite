@@ -22,3 +22,5 @@ src/models/groqapi.py
 *.bat
 
 temp.bat
+
+runs
