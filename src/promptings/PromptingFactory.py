@@ -4,7 +4,6 @@ from promptings.Analogical import AnalogicalStrategy
 from promptings.SelfPlanning import SelfPlanningStrategy
 
 from promptings.SCoder import SCoder
-from promptings.SCoderV16 import SCoderV16
 from promptings.MapCoder import MapCoder
 
 
@@ -23,7 +22,5 @@ class PromptingFactory:
             return SelfPlanningStrategy
         elif prompting_name == "SCoder":
             return SCoder
-        elif prompting_name == "SCoderV16":
-            return SCoderV16
         else:
             raise Exception(f"Unknown prompting name {prompting_name}")

@@ -47,7 +47,6 @@ parser.add_argument(
         "Analogical",
         "MapCoder",
         "SCoder",
-        "SCoderV16",
     ]
 )
 parser.add_argument(
