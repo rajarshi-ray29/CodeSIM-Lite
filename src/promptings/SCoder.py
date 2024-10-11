@@ -46,6 +46,7 @@ class SCoder(DirectStrategy):
             type(self.data) == CodeContestDataset or \
             type(self.data) == XCodeDataset
 
+        # Cost reduction for competative programming
         if self.is_competative:
             self.max_plan_try = 3
             self.max_debug_try = 3
@@ -53,7 +54,7 @@ class SCoder(DirectStrategy):
 
         if self.verbose >= VERBOSE_FULL:
             print("\n\n" + "_" * 70)
-            print(f"Running SCoder with additional_info_run={additional_info_run}, max_plan_try={max_plan_try}, max_debug_try={max_debug_try}")
+            print(f"Running SCoder with additional_info_run={additional_info_run}, max_plan_try={self.max_plan_try}, max_debug_try={self.max_debug_try}")
             print("\n", flush=True)
 
 
@@ -107,18 +108,26 @@ class SCoder(DirectStrategy):
             self.language
         )
 
-        return passed_sample & passed_additional, self.process_test_log(test_log_sample + test_log_additional)
+        if self.is_competative:
+            test_log_sample = test_log_sample[test_log_sample.find("## Tests failed:"):]
+            test_log = test_log_sample + test_log_additional
+        else:
+            test_log = self.process_test_log(test_log_sample + test_log_additional)
+
+        return passed_sample & passed_additional, test_log
     
 
     def run_single_pass(self, data_row: dict):
         print("", flush=True)
+
+        problem = self.data.get_prompt(data_row)
 
         std_input_prompt = ""
 
         if self.is_competative:
             std_input_prompt = "- Strictly follow the input and output format. The input should be taken from Standard input and output should be given to standard output. If you are writing a function then after the function definition take input using `input()` function then call the function with specified parameters and finally print the output of the function. Do not add extra print statement otherwise it will failed the test cases."
 
-        problem = self.data.get_prompt(data_row)
+            problem = problem[:problem.find("-------\nImportant Note:")]
 
         additional_io = []
 
@@ -533,12 +542,6 @@ Your response must be structured as follows:
 - If the simulation is successful write **No Need to Modify Plan**.
 - Otherwise write **Plan Modification Needed**.
 
----
-
-**Important Instructions:**
-
-- Strictly follow the instructions.
-- Do not generate code.
 """
 
 
@@ -549,6 +552,10 @@ prompt_for_plan_refinement = """You are a programmer tasked with generating appr
 ## Plan Critique
 
 {critique}
+
+**Expected Output:**
+
+Your response must be structured as follows:
 
 ## New Plan
 
@@ -580,12 +587,17 @@ prompt_for_debugging = """You are a programmer who has received a solution of a 
 {problem_with_planning}
 
 ### Buggy Code
-
+```{language}
 {code}
+```
 
 ### Test Report
 
 {test_log}
+
+**Expected Output:**
+
+Your response must be structured as follows:
 
 ### Simulation with failed test case
 To detect where is the bug:
@@ -612,5 +624,6 @@ Based on this simulation detect any of the following cases:
 - Do not add testing code for example assert statement in your code.
 - Do not be overconfident that the generated code is correct. It is wrong.
 - The modified **{language}** code must be enclosed within triple backticks (```).
+- Your response must contain **Simulation with failed test case**, **Debugging Notes**, and **Modified Code** section.
 {std_input_prompt}"""
 
