@@ -1,6 +1,6 @@
 @echo off
 set retryDelay=60
-set command=python .\src\main.py --strategy SCoder --model LLaMa8B
+set command=python .\src\main.py --dataset CC --strategy SCoder --model Mixtral
 
 :: Activate the Conda environment
 call conda activate scoder

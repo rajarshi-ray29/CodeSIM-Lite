@@ -114,61 +114,61 @@ class SCoder(DirectStrategy):
 
         problem = self.data.get_prompt(data_row)
 
-        additional_io = None
+        additional_io = []
 
-        if type(self.data) == MBPPDataset:
+        # if type(self.data) == MBPPDataset:
 
-            # Additional IO collection
-            for idx in range(1, self.additional_info_run + 1):
-                # Additional IO
-                additional_io_generation_input = [
-                    {
-                        "role": "user",
-                        "content": prompt_for_additional_io.format(
-                            problem=problem,
-                            problem_name=data_row["entry_point"],
-                        ),
-                    },
-                ]
+        #     # Additional IO collection
+        #     for idx in range(1, self.additional_info_run + 1):
+        #         # Additional IO
+        #         additional_io_generation_input = [
+        #             {
+        #                 "role": "user",
+        #                 "content": prompt_for_additional_io.format(
+        #                     problem=problem,
+        #                     problem_name=data_row["entry_point"],
+        #                 ),
+        #             },
+        #         ]
 
-                if self.verbose >= VERBOSE_FULL:
-                    print("\n\n" + "_" * 70)
-                    print(f"Input for Additional IO Generation: {idx}\n\n")
-                    print(additional_io_generation_input[0]['content'], flush=True)
+        #         if self.verbose >= VERBOSE_FULL:
+        #             print("\n\n" + "_" * 70)
+        #             print(f"Input for Additional IO Generation: {idx}\n\n")
+        #             print(additional_io_generation_input[0]['content'], flush=True)
 
-                response = self.gpt_chat(
-                    processed_input=additional_io_generation_input,
-                    frequency_penalty=0.2
-                )
+        #         response = self.gpt_chat(
+        #             processed_input=additional_io_generation_input,
+        #             frequency_penalty=0.2
+        #         )
 
-                if self.verbose >= VERBOSE_FULL:
-                    print("\n\n" + "_" * 70)
-                    print(f"Response from Additional IO Generation: {idx}\n\n")
-                    print(response, flush=True)
+        #         if self.verbose >= VERBOSE_FULL:
+        #             print("\n\n" + "_" * 70)
+        #             print(f"Response from Additional IO Generation: {idx}\n\n")
+        #             print(response, flush=True)
 
-                additional_io_response = parse_response(response)
+        #         additional_io_response = response
 
-                # Applying intersection for self-consistancy
-                if additional_io is None:
-                    additional_io = set(self.parse_test_cases(
-                        test_cases=additional_io_response
-                    ))
-                else:
-                    additional_io_ = self.parse_test_cases(
-                        test_cases=additional_io_response
-                    )
-                    additional_io = additional_io.intersection(set(additional_io_))
+        #         # Applying intersection for self-consistancy
+        #         if additional_io is None:
+        #             additional_io = set(self.parse_test_cases(
+        #                 test_cases=additional_io_response
+        #             ))
+        #         else:
+        #             additional_io_ = self.parse_test_cases(
+        #                 test_cases=additional_io_response
+        #             )
+        #             additional_io = additional_io.intersection(set(additional_io_))
 
-            additional_io = list(additional_io)
-            if self.verbose >= VERBOSE_FULL:
-                print(f"Additional IOs:")
-                print(additional_io, flush=True)
+        #     additional_io = list(additional_io)
+        #     if self.verbose >= VERBOSE_FULL:
+        #         print(f"Additional IOs:")
+        #         print(additional_io, flush=True)
 
-            # Forcing no sample io as MBPP contains no sample io
-            data_row['sample_io'] = []
+        #     # Forcing no sample io as MBPP contains no sample io
+        #     data_row['sample_io'] = []
 
-        else:
-            additional_io = []
+        # else:
+        #     additional_io = []
         
         self.run_details["additional_io"] = additional_io
 
@@ -389,7 +389,6 @@ For the problem `{problem_name}`
         - **Valid** and **Invalid** case scenarios
     inside **Test Cases** section.
     - Write down each test case in a single line following the pattern shown in the example problem.
-    - The generated test cases must be inside a triple backtick (```) code block.
     - Do not generate any code to solve this problem.
 """
 

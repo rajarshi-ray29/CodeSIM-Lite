@@ -21,7 +21,7 @@ class GroqModel(BaseModel):
         self.model_name = kwargs.get("model_name", "llama3-8b-8192")
         self.temperature = kwargs.get("temperature", 0.0)
         self.top_p = kwargs.get("top_p", 0.95)
-        self.max_tokens = kwargs.get("max_tokens", 8192)
+        self.max_tokens = kwargs.get("max_tokens", 4096)
         self.sleep_time = sleep_time
         self.api_key = get_api_key_at_random()
 
@@ -41,6 +41,7 @@ class GroqModel(BaseModel):
         response = self.client.chat.completions.create(
             messages=processed_input,
             model=self.model_name,
+            max_tokens=self.max_tokens
         )
 
         end_time = time.perf_counter()
@@ -72,15 +73,16 @@ class GroqModel(BaseModel):
 
 class LLaMa370B(GroqModel):
     def __init__(self, **kwargs):
-        super().__init__(model_name="llama-3.1-70b-versatile", max_tokens=8192, **kwargs)
+        super().__init__(model_name="llama-3.1-70b-versatile", max_tokens=8000, **kwargs)
 
 class LLaMa38B(GroqModel):
     def __init__(self, **kwargs):
-        super().__init__(model_name="llama-3.1-8b-instant", max_tokens=8192, **kwargs)
+        super().__init__(model_name="llama-3.1-8b-instant", max_tokens=8000, **kwargs)
 
 class Mixtral87B(GroqModel):
     def __init__(self, **kwargs):
-        super().__init__(model_name="mixtral-8x7b-32768", max_tokens=32768, **kwargs)
+        super().__init__(model_name="mixtral-8x7b-32768", max_tokens=8000, **kwargs)
+        # print(f"Max tokens: {self.max_tokens}")
 
 class Gemma29B(GroqModel):
     def __init__(self, **kwargs):

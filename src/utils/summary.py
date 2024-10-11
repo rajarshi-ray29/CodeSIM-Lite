@@ -58,7 +58,7 @@ def gen_summary(results_path: str, summary_path: str):
         summary_file.write(f"\n")
         summary_file.write(f"{'Total Cost:':<{name_width}} {total_cost:>{value_width}.02f}\n")
         summary_file.write(f"\n")
-        summary_file.write(f"{'Total Api Calls:':<{name_width}} {total_api_calls:>{value_width}}\n")
+        summary_file.write(f"{'Total Api Calls:':<{name_width}} {total_api_calls:>{value_width}.02f}\n")
         summary_file.write(f"{'Max Api Calls:':<{name_width}} {max_api_calls:>{value_width}}\n")
         summary_file.write(f"{'Min Api Calls:':<{name_width}} {min_api_calls:>{value_width}}\n")
         summary_file.write(f"{'Average Api Calls:':<{name_width}} {average_api_calls:>{value_width}.02}\n")
