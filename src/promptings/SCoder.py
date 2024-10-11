@@ -42,6 +42,14 @@ class SCoder(DirectStrategy):
         self.max_plan_try=max_plan_try
         self.max_debug_try=max_debug_try
 
+        self.is_competative = type(self.data) == APPSDataset or \
+            type(self.data) == CodeContestDataset or \
+            type(self.data) == XCodeDataset
+
+        if self.is_competative:
+            self.max_plan_try = 3
+            self.max_debug_try = 3
+
 
         if self.verbose >= VERBOSE_FULL:
             print("\n\n" + "_" * 70)
@@ -107,9 +115,7 @@ class SCoder(DirectStrategy):
 
         std_input_prompt = ""
 
-        if type(self.data) == APPSDataset or \
-            type(self.data) == CodeContestDataset or \
-            type(self.data) == XCodeDataset:
+        if self.is_competative:
             std_input_prompt = "- Strictly follow the input and output format. The input should be taken from Standard input and output should be given to standard output. If you are writing a function then after the function definition take input using `input()` function then call the function with specified parameters and finally print the output of the function. Do not add extra print statement otherwise it will failed the test cases."
 
         problem = self.data.get_prompt(data_row)
@@ -176,15 +182,27 @@ class SCoder(DirectStrategy):
         # Planning, Coding, Debugging
         for plan_no in range(1, self.max_plan_try + 1):
             # Planning Phase
-            input_for_planning = [
-                {
-                    "role": "user",
-                    "content": prompt_for_planning.format(
-                        problem=problem,
-                        language=self.language,
-                    )
-                },
-            ]
+
+            if self.is_competative:
+                input_for_planning = [
+                    {
+                        "role": "user",
+                        "content": prompt_for_planning_competative.format(
+                            problem=problem,
+                            language=self.language,
+                        )
+                    },
+                ]
+            else:
+                input_for_planning = [
+                    {
+                        "role": "user",
+                        "content": prompt_for_planning.format(
+                            problem=problem,
+                            language=self.language,
+                        )
+                    },
+                ]
 
             if self.verbose >= VERBOSE_FULL:
                 print("\n\n" + "_" * 70)
@@ -445,6 +463,46 @@ Recall a relevant and distinct problems (different from problem mentioned above)
 - describe it
 - generate {language} code step by step to solve that problem
 - finally generate a planning to solve that problem
+
+### Plan
+
+- Write down a detailed, step-by-step plan to solve the **original problem**.
+
+--------
+**Important Instruction:**
+- Strictly follow the instructions.
+- Do not generate code.
+"""
+
+
+prompt_for_planning_competative = """You are a programmer tasked with generating appropriate plan to solve a given problem using the **{language}** programming language.
+
+## Problem
+
+{problem}
+
+**Expected Output:**
+
+Your response must be structured as follows:
+
+### Problem Understanding
+
+- Think about the original problem. Develop an initial understanding about the problem.
+
+### Recall Example Problem
+
+Recall a relevant and distinct problems (different from problem mentioned above) and
+- Describe it
+- Generate {language} code step by step to solve that problem
+- Discuss the algorithm to solve this problem
+- Finally generate a planning to solve that problem
+
+### Algorithm to solve the original problem
+
+- Write down the algorithm that is well suited for the original problem
+- Give some tutorials to about the algorithm for example:
+    - How to approach this type of algorithm
+    - Important things to consier
 
 ### Plan
 

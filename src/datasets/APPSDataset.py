@@ -64,4 +64,4 @@ class APPSDataset(Dataset):
         if len(item['sample_io']) > 0:
             sample_io_format = f"Sample Input Format:\n{item['sample_io'][0]['input']}\nSample Output Format:\n{item['sample_io'][0]['output'][0]}\n\n-------\n"
 
-        return f"{item['description']}\n\n{sample_io_format}Important: You must follow the input output format. Input should be taken from standard input and output should be given to standard output.\nNote: If you are writing a function then after the function definition take input from using `input()` function, call the function with specified parameters and finally print the output of the function."
+        return f"{item['description']}\n\n{sample_io_format}\n-------\nImportant Note: You must follow the input output format. Input should be taken from standard input and output should be given to standard output.\nNote: If you are writing a function then after the function definition take input from using `input()` function, call the function with specified parameters and finally print the output of the function."
