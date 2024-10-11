@@ -46,7 +46,7 @@ MBPP_DATA_DIR = join(
 
 MBPP_DATA_PATH = join(
     MBPP_DATA_DIR,
-    "MBPP-py.jsonl"
+    "mbpp-py.jsonl"
 )
 
 MBPP_ET_DATA_PATH = join(

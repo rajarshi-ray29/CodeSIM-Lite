@@ -192,26 +192,26 @@ class SCoder(DirectStrategy):
         for plan_no in range(1, self.max_plan_try + 1):
             # Planning Phase
 
-            if self.is_competative:
-                input_for_planning = [
-                    {
-                        "role": "user",
-                        "content": prompt_for_planning_competative.format(
-                            problem=problem,
-                            language=self.language,
-                        )
-                    },
-                ]
-            else:
-                input_for_planning = [
-                    {
-                        "role": "user",
-                        "content": prompt_for_planning.format(
-                            problem=problem,
-                            language=self.language,
-                        )
-                    },
-                ]
+            # if self.is_competative:
+            input_for_planning = [
+                {
+                    "role": "user",
+                    "content": prompt_for_planning_competative.format(
+                        problem=problem,
+                        language=self.language,
+                    )
+                },
+            ]
+            # else:
+            #     input_for_planning = [
+            #         {
+            #             "role": "user",
+            #             "content": prompt_for_planning.format(
+            #                 problem=problem,
+            #                 language=self.language,
+            #             )
+            #         },
+            #     ]
 
             if self.verbose >= VERBOSE_FULL:
                 print("\n\n" + "_" * 70)
