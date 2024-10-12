@@ -12,7 +12,7 @@ import xml.etree.ElementTree as ET
 from .Base import BaseStrategy
 from .Direct import DirectStrategy
 from models.Base import BaseModel
-from models.OpenAI import GPT4
+
 
 from datasets.Dataset import Dataset
 from datasets.APPSDataset import APPSDataset
