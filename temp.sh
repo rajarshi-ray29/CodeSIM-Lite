@@ -1,0 +1,1 @@
+docker run -v /home/ashraful/prompting/SCoder:/app ganler/evalplus:latest --dataset humaneval --samples /app/results/HumanEval/SCoder/ChatGPT1106/Python3-0-0.95-1/Run-1/Results-EP.jsonl > /home/ashraful/prompting/SCoder/results/HumanEval/SCoder/ChatGPT1106/Python3-0-0.95-1/Run-1/Summary-EP.txt

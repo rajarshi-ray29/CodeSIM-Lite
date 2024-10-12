@@ -26,7 +26,7 @@ from evaluations.func_evaluate import evaluate_io
 from utils.parse import parse_response
 from constants.verboseType import *
 
-class SCoder(DirectStrategy):
+class SCoderWPV(DirectStrategy):
     def __init__(
         self,
         additional_info_run=2,
@@ -131,60 +131,6 @@ class SCoder(DirectStrategy):
 
         additional_io = []
 
-        # if type(self.data) == MBPPDataset:
-
-        #     # Additional IO collection
-        #     for idx in range(1, self.additional_info_run + 1):
-        #         # Additional IO
-        #         additional_io_generation_input = [
-        #             {
-        #                 "role": "user",
-        #                 "content": prompt_for_additional_io.format(
-        #                     problem=problem,
-        #                     problem_name=data_row["entry_point"],
-        #                 ),
-        #             },
-        #         ]
-
-        #         if self.verbose >= VERBOSE_FULL:
-        #             print("\n\n" + "_" * 70)
-        #             print(f"Input for Additional IO Generation: {idx}\n\n")
-        #             print(additional_io_generation_input[0]['content'], flush=True)
-
-        #         response = self.gpt_chat(
-        #             processed_input=additional_io_generation_input,
-        #             frequency_penalty=0.2
-        #         )
-
-        #         if self.verbose >= VERBOSE_FULL:
-        #             print("\n\n" + "_" * 70)
-        #             print(f"Response from Additional IO Generation: {idx}\n\n")
-        #             print(response, flush=True)
-
-        #         additional_io_response = response
-
-        #         # Applying intersection for self-consistancy
-        #         if additional_io is None:
-        #             additional_io = set(self.parse_test_cases(
-        #                 test_cases=additional_io_response
-        #             ))
-        #         else:
-        #             additional_io_ = self.parse_test_cases(
-        #                 test_cases=additional_io_response
-        #             )
-        #             additional_io = additional_io.intersection(set(additional_io_))
-
-        #     additional_io = list(additional_io)
-        #     if self.verbose >= VERBOSE_FULL:
-        #         print(f"Additional IOs:")
-        #         print(additional_io, flush=True)
-
-        #     # Forcing no sample io as MBPP contains no sample io
-        #     data_row['sample_io'] = []
-
-        # else:
-        #     additional_io = []
-        
         self.run_details["additional_io"] = additional_io
 
         
@@ -238,65 +184,6 @@ class SCoder(DirectStrategy):
                 plan = response[response.rfind("### Plan"):]
 
             problem_with_planning = f"## Problem:\n{problem}\n\n{plan}"
-
-            # Simulation Phase
-            input_for_simulation = [
-                {
-                    "role": "user",
-                    "content": prompt_for_simulation.format(
-                        problem_with_planning=problem_with_planning,
-                        language=self.language,
-                    )
-                },
-            ]
-
-            if self.verbose >= VERBOSE_FULL:
-                print("\n\n" + "_" * 70)
-                print(f"Input for Simulation: {plan_no}\n\n")
-                print(input_for_simulation[0]['content'], flush=True)
-
-            response = self.gpt_chat(
-                processed_input=input_for_simulation
-            )
-
-            if self.verbose >= VERBOSE_FULL:
-                print("\n\n" + "_" * 70)
-                print(f"Response from Simulation: {plan_no}\n\n")
-                print(response, flush=True)
-
-            if "Plan Modification Needed" in response and \
-                "No Plan Modification Needed" not in response:
-                if self.verbose >= VERBOSE_FULL:
-                    print("\n\n" + "_" * 70)
-                    print(f"**Plan Modification Needed.**\n")
-                
-                # Plan Refinement Phase
-                input_for_plan_refinement = [
-                    {
-                        "role": "user",
-                        "content": prompt_for_plan_refinement.format(
-                            problem_with_planning=problem_with_planning,
-                            language=self.language,
-                            critique=response
-                        )
-                    },
-                ]
-
-                if self.verbose >= VERBOSE_FULL:
-                    print("\n\n" + "_" * 70)
-                    print(f"Input for Plan Refinement: {plan_no}\n\n")
-                    print(input_for_plan_refinement[0]['content'], flush=True)
-
-                plan = self.gpt_chat(
-                    processed_input=input_for_simulation
-                )
-
-                if self.verbose >= VERBOSE_FULL:
-                    print("\n\n" + "_" * 70)
-                    print(f"Response from Plan Refinement: {plan_no}\n\n")
-                    print(plan, flush=True)
-                
-                problem_with_planning = f"## Problem:\n{problem}\n\n{plan}"
 
             # Code generation
             input_for_final_code_generation = [

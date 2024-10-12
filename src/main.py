@@ -47,6 +47,10 @@ parser.add_argument(
         "Analogical",
         "MapCoder",
         "SCoder",
+        "SCoderWD",
+        "SCoderWPV",
+        "SCoderWPVD",
+        "SCoderA",
     ]
 )
 parser.add_argument(
@@ -59,7 +63,8 @@ parser.add_argument(
         "ChatGPT3",
         "ChatGPT11061",
         "ChatGPT11062",
-        "GPT4",
+        "ChatGPT11063",
+        "GPT41",
         "GPT42",
         "GPT43",
         "GPT44",

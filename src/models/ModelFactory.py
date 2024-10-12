@@ -27,8 +27,10 @@ class ModelFactory:
             return ChatGPT11061
         elif model_name == "chatgpt11062":
             return ChatGPT11062
-        elif model_name == "gpt4":
-            return GPT4
+        elif model_name == "chatgpt11063":
+            return ChatGPT11063
+        elif model_name == "gpt41":
+            return GPT41
         elif model_name == "gpt42":
             return GPT42
         elif model_name == "gpt43":

@@ -6,7 +6,7 @@ import os
 def generate_et_dataset_human(
         NORMAL_RESULTS_PATH,
         ET_RESULTS_PATH,
-        ET_DATA_PATH=".\\data\\HumanEval\\HumanEvalET.jsonl"
+        ET_DATA_PATH="data/HumanEval/HumanEvalET.jsonl"
 ):
     dataset = read_jsonl(ET_DATA_PATH)
     data_dict = {}
@@ -54,7 +54,7 @@ def generate_et_dataset_human(
 def generate_et_dataset_mbpp(
         NORMAL_RESULTS_PATH,
         ET_RESULTS_PATH,
-        ET_DATA_PATH=".\\data\\MBPPEval\\MBPP_ET.jsonl"
+        ET_DATA_PATH="data/MBPPEval/MBPP_ET.jsonl"
 ):
     dataset = read_jsonl(ET_DATA_PATH)
     data_dict = {}

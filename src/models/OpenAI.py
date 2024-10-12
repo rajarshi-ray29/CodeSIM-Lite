@@ -113,7 +113,7 @@ class ChatGPT(GPTV1Base):
 
 class ChatGPT2(GPTV1Base):
     def __init__(self, **kwargs):
-        super().__init__(model=chatgpt2, sleep_time=0, **kwargs)
+        super().__init__(model=chatgpt2, sleep_time=10, **kwargs)
 
 
 
@@ -132,8 +132,14 @@ class ChatGPT11062(GPTV1Base):
         super().__init__(model=chatgpt11062, sleep_time=0, **kwargs)
 
 
+class ChatGPT11063(GPTV1Base):
+    def __init__(self, **kwargs):
+        super().__init__(model=chatgpt11063, sleep_time=0, **kwargs)
 
-class GPT4(GPTV1Base):
+
+
+
+class GPT41(GPTV1Base):
     
     def __init__(self, **kwargs):
         super().__init__(model=gpt4, sleep_time=0, **kwargs)
