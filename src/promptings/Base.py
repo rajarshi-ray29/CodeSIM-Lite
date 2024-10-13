@@ -140,4 +140,5 @@ class BaseStrategy(object):
 
             if self.verbose >= VERBOSE_FULL:
                 print("", flush=True, end="")
-
+          
+        

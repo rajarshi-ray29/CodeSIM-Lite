@@ -51,6 +51,7 @@ parser.add_argument(
         "SCoderWPV",
         "SCoderWPVD",
         "SCoderA",
+        "SCoderC",
     ]
 )
 parser.add_argument(
@@ -64,6 +65,12 @@ parser.add_argument(
         "ChatGPT11061",
         "ChatGPT11062",
         "ChatGPT11063",
+        "GPT4c1",
+        "GPT4c2",
+        "GPT4c3",
+        "GPT4c4",
+        "GPT4c5",
+        "GPT4c6",
         "GPT41",
         "GPT42",
         "GPT43",

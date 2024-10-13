@@ -4,8 +4,9 @@ from promptings.Analogical import AnalogicalStrategy
 from promptings.SelfPlanning import SelfPlanningStrategy
 
 from promptings.SCoder import SCoder
-from promptings.SCoderWD import SCoderWD
 from promptings.SCoderA import SCoderA
+from promptings.SCoderC import SCoderC
+from promptings.SCoderWD import SCoderWD
 from promptings.SCoderWPV import SCoderWPV
 from promptings.SCoderWPVD import SCoderWPVD
 from promptings.MapCoder import MapCoder
@@ -26,6 +27,8 @@ class PromptingFactory:
             return SelfPlanningStrategy
         elif prompting_name == "SCoder":
             return SCoder
+        elif prompting_name == "SCoderC":
+            return SCoderC
         elif prompting_name == "SCoderWD":
             return SCoderWD
         elif prompting_name == "SCoderWPV":

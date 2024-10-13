@@ -127,7 +127,7 @@ def contest_evaluate_public_tests(
     id: int,
     tests: List[dict],
 ):
-    results, _, _ = api_comm.execute_code(
+    results, error, _ = api_comm.execute_code(
         language=LANGUAGE_MAPPING[lang],
         source_code=generated_code,
         unittests=tests,
@@ -135,6 +135,9 @@ def contest_evaluate_public_tests(
         task_id=id,
         stop_on_first_fail=False
     )
+
+    if error is not None:
+        return False, f"## Tests failed:\nSyntax Error Message:{error}"
 
     passed = True
     passed_feedback = []

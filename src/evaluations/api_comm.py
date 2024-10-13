@@ -105,11 +105,13 @@ class APICommunication:
             headers={"Content-Type": "application/json"},
         ).json()
 
+        if "error" in json_response:
+            return "error", json_response["error"], task_id
         if "data" not in json_response:
-            return "error", sample_id, task_id
+            return "error", str(json_response), task_id
 
         return (
             json_response["data"],
-            sample_id,
+            None,
             task_id,
         )

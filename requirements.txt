@@ -13,4 +13,5 @@ astunparse
 pyarrow
 google-generativeai
 accelerate
-
+groq
+matplotlib

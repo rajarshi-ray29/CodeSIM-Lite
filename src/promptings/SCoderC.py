@@ -25,10 +25,9 @@ from evaluations.func_evaluate import evaluate_io
 from utils.parse import parse_response
 from constants.verboseType import *
 
-class SCoder(DirectStrategy):
+class SCoderC(DirectStrategy):
     def __init__(
         self,
-        additional_info_run=2,
         max_plan_try=5,
         max_debug_try=5,
         *args,
@@ -37,23 +36,22 @@ class SCoder(DirectStrategy):
         super().__init__(*args, **kwargs)
 
         
-        self.additional_info_run=additional_info_run
         self.max_plan_try=max_plan_try
         self.max_debug_try=max_debug_try
 
-        self.is_competative = type(self.data) == APPSDataset or \
+        self.is_competitive = type(self.data) == APPSDataset or \
             type(self.data) == CodeContestDataset or \
             type(self.data) == XCodeDataset
 
         # Cost reduction for competative programming
-        if self.is_competative:
+        if self.is_competitive:
             self.max_plan_try = 3
-            self.max_debug_try = 3
+            self.max_debug_try = 5
 
 
         if self.verbose >= VERBOSE_FULL:
             print("\n\n" + "_" * 70)
-            print(f"Running SCoder with additional_info_run={additional_info_run}, max_plan_try={self.max_plan_try}, max_debug_try={self.max_debug_try}")
+            print(f"Running SCoder with max_plan_try={self.max_plan_try}, max_debug_try={self.max_debug_try}")
             print("\n", flush=True)
 
 
@@ -107,7 +105,7 @@ class SCoder(DirectStrategy):
             self.language
         )
 
-        if self.is_competative:
+        if self.is_competitive:
             test_log_sample = test_log_sample[test_log_sample.find("## Tests failed:"):]
             test_log = test_log_sample + test_log_additional
         else:
@@ -123,7 +121,7 @@ class SCoder(DirectStrategy):
 
         std_input_prompt = ""
 
-        if self.is_competative:
+        if self.is_competitive:
             std_input_prompt = \
 """- Strictly follow the sample input and output format. 
     - The input should be taken from Standard input and output should be given to standard output. If you are writing a function then after the function definition take the input using `input()` function then call the function with specified parameters and finally print the output of the function. 

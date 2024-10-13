@@ -13,8 +13,7 @@ test*
 results/*
 outputs/*
 
-costing-old.csv
-costing.csv
+costing*.csv
 src/models/openaiapi.py
 src/models/geminiapi.py
 src/models/groqapi.py

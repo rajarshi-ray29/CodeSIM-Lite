@@ -137,6 +137,37 @@ class ChatGPT11063(GPTV1Base):
         super().__init__(model=chatgpt11063, sleep_time=0, **kwargs)
 
 
+class GPT4c1(GPTV1Base):
+    
+    def __init__(self, **kwargs):
+        super().__init__(model=gpt4c1, sleep_time=0, **kwargs)
+
+class GPT4c2(GPTV1Base):
+    
+    def __init__(self, **kwargs):
+        super().__init__(model=gpt4c2, sleep_time=0, **kwargs)
+
+class GPT4c3(GPTV1Base):
+    
+    def __init__(self, **kwargs):
+        super().__init__(model=gpt4c3, sleep_time=0, **kwargs)
+
+
+class GPT4c4(GPTV1Base):
+    
+    def __init__(self, **kwargs):
+        super().__init__(model=gpt4c4, sleep_time=0, **kwargs)
+
+class GPT4c5(GPTV1Base):
+    
+    def __init__(self, **kwargs):
+        super().__init__(model=gpt4c5, sleep_time=0, **kwargs)
+
+class GPT4c6(GPTV1Base):
+    
+    def __init__(self, **kwargs):
+        super().__init__(model=gpt4c6, sleep_time=0, **kwargs)
+
 
 
 class GPT41(GPTV1Base):
@@ -180,7 +211,7 @@ class GPTV2Base(OpenAIModel):
         self.sleep_time = sleep_time
 
 
-    @retry(wait=wait_random_exponential(min=1, max=60), stop=stop_after_attempt(5))
+    # @retry(wait=wait_random_exponential(min=1, max=60), stop=stop_after_attempt(5))
     def prompt(
         self, 
         processed_input: list[dict], 
