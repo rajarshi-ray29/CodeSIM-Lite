@@ -59,7 +59,7 @@ class BaseStrategy(object):
         pass
 
     def run(self, record_full_result):
-        self.data.data.reverse()
+        # self.data.data.reverse()
         
         num_items = len(self.data)
         num_success = 0
@@ -68,13 +68,16 @@ class BaseStrategy(object):
             if self.verbose >= VERBOSE_FULL:
                 print("", flush=True, end="")
 
-            if i < len(self.results) and \
-                data_row[self.data.id_key] == self.results[i]["task_id"]:
-                item = copy.deepcopy(self.results[i])
-                cur_pass = len(item["source_codes"])
-                is_solved = item["is_solved"]
-                cur_imp = item["source_codes"][-1]
-            else:
+            found = False
+            for j in range(len(self.results)):
+                if self.results[j]["task_id"] == data_row[self.data.id_key]:
+                    item = copy.deepcopy(self.results[j])
+                    cur_pass = len(item["source_codes"])
+                    is_solved = item["is_solved"]
+                    cur_imp = item["source_codes"][-1]
+                    found = True
+                    break
+            if not found:
                 item = {
                     self.data.id_key: data_row[self.data.id_key],
                     "task_id": data_row[self.data.id_key],
@@ -124,14 +127,24 @@ class BaseStrategy(object):
 
             item["is_solved"] = is_solved
 
-            if i < len(self.results):
-                if item["task_id"] == self.results[i]["task_id"]:
-                    self.results.results[i] = item
-                else:
-                    self.results.get_results().insert(i, item)
-                    self.results.save_results()
-            else:
-                self.results.add_result(item)
+            self.results.get_results().insert(i, item)
+
+            # Deleting duplicate results
+            k = i + 1
+            while True:
+                # Termination condition
+                if k >= len(self.results):
+                    break
+                
+                # Deleting duplicate results
+                if self.results[k]["task_id"] == data_row[self.data.id_key]:
+                    del self.results[k]
+                
+                # Increment
+                k += 1
+            
+            if not found:
+                self.results.save_results()
 
             if self.verbose >= VERBOSE_MINIMAL:
                 print(f'completed {i+1}/{num_items}, Solved: {self.results[i]["is_solved"]}, number of success = {num_success}/{i+1}, acc = {round(num_success/(i+1)*100, 2)}')
@@ -142,3 +155,6 @@ class BaseStrategy(object):
                 print("", flush=True, end="")
           
         
+        if len(self.results) > len(self.data):
+            self.results.results = self.results[:len(self.data)]
+            self.results.save_results()

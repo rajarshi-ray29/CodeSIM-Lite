@@ -1,1 +1,1 @@
-docker run -v /home/ashraful/prompting/SCoder:/app ganler/evalplus:latest --dataset humaneval --samples /app/results/HumanEval/SCoder/GPT4ol/Python3-0-0.95-1/Run-2/Results-EP.jsonl > /home/ashraful/prompting/SCoder/results/HumanEval/SCoder/GPT4ol/Python3-0-0.95-1/Run-2/Summary-EP.txt
+docker run -v /home/ashraful/prompting/SCoder:/app ganler/evalplus:latest --dataset humaneval --samples /app/results/HumanEval/SCoderA/GPT4ol/Python3-0-0.95-1/Run-1/Results-EP.jsonl > /home/ashraful/prompting/SCoder/results/HumanEval/SCoderA/GPT4ol/Python3-0-0.95-1/Run-1/Summary-EP.txt

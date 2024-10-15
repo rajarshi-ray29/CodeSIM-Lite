@@ -28,8 +28,8 @@ from constants.verboseType import *
 class SCoder(DirectStrategy):
     def __init__(
         self,
-        additional_info_run=0,
-        max_plan_try=1,
+        additional_info_run=2,
+        max_plan_try=5,
         max_debug_try=5,
         *args,
         **kwargs
@@ -41,9 +41,14 @@ class SCoder(DirectStrategy):
         self.max_plan_try=max_plan_try
         self.max_debug_try=max_debug_try
 
-        self.is_competative = type(self.data) == APPSDataset or \
+        self.is_competitive = type(self.data) == APPSDataset or \
             type(self.data) == CodeContestDataset or \
             type(self.data) == XCodeDataset
+
+        # Cost reduction for competitive programming
+        if self.is_competitive:
+            self.max_plan_try = 5
+            self.max_debug_try = 3
 
 
         if self.verbose >= VERBOSE_FULL:
@@ -65,14 +70,14 @@ class SCoder(DirectStrategy):
     @staticmethod
     def process_test_log(test_logs: str):
         passed_test_cases = []
-        falied_test_cases = []
+        failed_test_cases = []
         for test_log in test_logs.splitlines():
             if test_log.startswith("Passed"):
                 passed_test_cases.append(test_log[test_log.index("assert"):])
             if test_log.startswith("Failed"):
-                falied_test_cases.append(test_log[test_log.index("assert"):])
+                failed_test_cases.append(test_log[test_log.index("assert"):])
         
-        return f"### Test Cases where the generated code failed to generate the expected output:\n{"\n".join(falied_test_cases)}"
+        return f"### Test Cases where the generated code failed to generate the expected output:\n{"\n".join(failed_test_cases)}"
 
 
     def parse_test_cases(self, test_cases: str):
@@ -102,7 +107,7 @@ class SCoder(DirectStrategy):
             self.language
         )
 
-        if self.is_competative:
+        if self.is_competitive:
             test_log_sample = test_log_sample[test_log_sample.find("## Tests failed:"):]
             test_log = test_log_sample + test_log_additional
         else:
@@ -118,7 +123,7 @@ class SCoder(DirectStrategy):
 
         std_input_prompt = ""
 
-        if self.is_competative:
+        if self.is_competitive:
             std_input_prompt = \
 """- Strictly follow the sample input and output format. 
     - The input should be taken from Standard input and output should be given to standard output. If you are writing a function then after the function definition take the input using `input()` function then call the function with specified parameters and finally print the output of the function. 
@@ -190,11 +195,11 @@ class SCoder(DirectStrategy):
         for plan_no in range(1, self.max_plan_try + 1):
             # Planning Phase
 
-            # if self.is_competative:
+            # if self.is_competitive:
             input_for_planning = [
                 {
                     "role": "user",
-                    "content": prompt_for_planning.format(
+                    "content": prompt_for_planning_competitive.format(
                         problem=problem,
                         language=self.language,
                     )
@@ -377,7 +382,112 @@ class SCoder(DirectStrategy):
         return code
 
 
+prompt_for_additional_io = """You are a tester tasked with creating comprehensive unit test cases for a given programming problem.
+
+## Problem
+
+def maximum_segments(n, a, b, c):
+    '''
+    Write a Python function to find the maximum number of segments of lengths a, b, and c
+    that can be formed from n.
+    '''
+
+### Problem Understanding
+
+The task is to maximize the number of segments you can cut from a total length `n`, where the possible segment lengths are `a`, `b`, and `c`. Let say we have a rope of length `n` meter. We need to cut it into segments. Possible segment length is `a`, `b`, and `c`. There may be many possible way of doing these segments. We need to find out the maximum number of segments from that rope.
+
+### Test Cases
+assert maximum_segments(7, 5, 2, 5) == 2
+assert maximum_segments(17, 2, 1, 3) == 17
+assert maximum_segments(18, 16, 3, 6) == 6
+assert maximum_segments(11, 8, 4, 9) == -1
+assert maximum_segments(5, 9, 6, 10) == -1
+
+---
+
+## Problem
+
+{problem}
+
+--------
+**Important Instruction:**
+For the problem `{problem_name}`
+    - First, understand the problem `{problem_name}` and write down the understanding inside **Problem Understanding** section. 
+    - Then Generate five (05) unit test cases that cover both:
+        - **Normal** and **Edge** case scenarios
+        - **Positive** and **Negative** case scenarios
+        - **Valid** and **Invalid** case scenarios
+    inside **Test Cases** section.
+    - Write down each test case in a single line following the pattern shown in the example problem.
+    - Do not generate any code to solve this problem.
+"""
+
+
+prompt_for_initial_code_generation = """{problem}
+
+--------
+Important Instructions:
+- Generate {language} code step-by-step to solve the above mentioned problem.
+- Do not generate any explanation.
+- The generated **{language}** code must be enclosed within triple backticks (```).
+{std_input_prompt}"""
+
+
+prompt_for_code_validation = """You are a tester tasked with checking a code for a given problem. 
+
+---
+
+## Problem
+
+{problem}
+
+## Code
+
+{code}
+
+---
+
+**Your output must follow the steps below:**
+- Try to generate a test case other than the sample test cases that are mentioned inside the problem.
+- Take a the input and apply the code step by step to get the output.
+- Compare the generated output with the expected output to verify if the generated code is ok or not.
+- Write **Buggy Code** if you find such a test case otherwise write **Code is ok**.
+"""
+
+
 prompt_for_planning = """You are a programmer tasked with generating appropriate plan to solve a given problem using the **{language}** programming language.
+
+## Problem
+
+{problem}
+
+**Expected Output:**
+
+Your response must be structured as follows:
+
+### Problem Understanding
+
+Think about the original problem. Develop an initial understanding about the problem.
+
+### Recall Example Problem
+
+Recall a relevant and distinct problems (different from problem mentioned above) and
+- Describe it
+- Generate {language} code to solve that problem
+- By seeing the code generate a plan to solve that problem
+
+### Plan
+
+- Write down a detailed, step-by-step plan to solve the **original problem**.
+
+--------
+**Important Instruction:**
+- Strictly follow the instructions.
+- Do not generate code.
+"""
+
+
+prompt_for_planning_competitive = """You are a programmer tasked with generating appropriate plan to solve a given problem using the **{language}** programming language.
 
 ## Problem
 
@@ -395,16 +505,14 @@ Your response must be structured as follows:
 
 Recall a relevant and distinct problems (different from problem mentioned above) and
 - Describe it
-- Generate {language} code step by step to solve that problem
+- Generate {language} code to solve that problem
 - Discuss the algorithm to solve this problem
-- Finally generate a planning to solve that problem
+- Finally generate a plan to solve that problem
 
 ### Algorithm to solve the original problem
 
-- Write down the algorithm that is well suited for the original problem
-- Give some tutorials to about the algorithm for example:
-    - How to approach this type of algorithm
-    - Important things to consider
+- Write down the algorithm type (i.e., Dynamic Programming, Greedy, Divide and Conquer, Constructive, and so on) that is well suited for the **original problem**
+- Give general tutorial about that algorithm type.
 
 ### Plan
 
@@ -435,6 +543,11 @@ Your response must be structured as follows:
 - If the simulation is successful write **No Need to Modify Plan**.
 - Otherwise write **Plan Modification Needed**.
 
+--------
+**Important Instruction:**
+- Strictly follow the instructions.
+- Do not generate code.
+- Your response must contain only the **Simulation** and **Plan Evaluation** section.
 """
 
 
@@ -457,9 +570,9 @@ Your response must be structured as follows:
 
 --------
 **Important Instruction:**
-- Your response must contain only the plan.
 - Do not add any explanation.
 - Do not generate code.
+- Your response must contain only **New Plan** section. Don not add any other section.
 """
 
 
@@ -470,12 +583,12 @@ prompt_for_code_generation = """You are a programmer tasked with solving a given
 
 --------
 **Important Instructions:**
-- Do not add any explanation.
+- Do not add any explanation or any unnecessary print.
 - The generated **{language}** code must be inside a triple backtick (```) code block.
 {std_input_prompt}"""
 
 
-prompt_for_debugging = """You are a programmer who has received a solution of a problem written in **{language}** that fails to pass certain test cases. Your task is to modify the code in such a way so that it can pass all the test cases. Do not generate same code.
+prompt_for_debugging = """You are a programmer who has received a solution of a problem written in **{language}** that fails to pass certain test cases. Your task is to modify the code in such a way so that it can pass all the test cases.
 
 {problem_with_planning}
 
@@ -492,14 +605,16 @@ Your response must be structured as follows:
 
 ### Simulation with failed test case
 To detect where is the bug follow following steps:
-    - Take a sample test case where it fails.
-    - Take the input go through each step according to the plan
-    - You will get a output that must be different from the expected output.
+- Take a sample test case where it fails.
+- Take the input from the test case and go through each step according to the plan. Do not generate code do it manually by applying reasoning.
+- After your simulation you will get a output that must be different from the expected output. 
 
 ### Debugging Notes
-- Based on this simulation detect any of the following cases:
-    - Plan is wrong
-    - Plan is correct but plan to code generation is wrong.
+Based on this simulation detect any of the following cases:
+- Plan is wrong
+- Plan is correct but plan to code generation is wrong.
+- If there is any syntax error in the code, fix that.
+- Check the input output format. If there is any mistake in the input output format fix that.
 - Finally, discuss how to correct this code.
 
 ### Modified Code
@@ -511,10 +626,8 @@ To detect where is the bug follow following steps:
 --------
 **Important Instructions:**
 - Strictly follow the instructions.
-- Do not add testing code for example assert statement in your code.
-- Do not be overconfident that the generated code is correct. It is wrong.
+- Do not add testing code for example assert statement or any unnecessary print in your code.
+- Do not be overconfident that the buggy code is correct.
 - The modified **{language}** code must be enclosed within triple backticks (```).
-- Your response must contain **Simulation with failed test case**, **Debugging Notes**,
-and **Modified Code** section.
-{std_input_prompt}"""
-
+{std_input_prompt}
+- Your response must contain **Simulation with failed test case**, **Debugging Notes**, and **Modified Code** section."""
