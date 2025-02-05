@@ -23,3 +23,4 @@ src/models/groqapi.py
 temp.bat
 
 runs
+src/models/deepseekapi.py

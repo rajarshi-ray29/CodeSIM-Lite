@@ -138,18 +138,16 @@ class BaseStrategy(object):
                 
                 # Deleting duplicate results
                 if self.results[k]["task_id"] == data_row[self.data.id_key]:
-                    del self.results[k]
+                    del self.results.results[k]
                 
                 # Increment
                 k += 1
-            
-            if not found:
-                self.results.save_results()
 
             if self.verbose >= VERBOSE_MINIMAL:
                 print(f'completed {i+1}/{num_items}, Solved: {self.results[i]["is_solved"]}, number of success = {num_success}/{i+1}, acc = {round(num_success/(i+1)*100, 2)}')
             
-            self.results.save_results()
+            if not found:
+                self.results.save_results()
 
             if self.verbose >= VERBOSE_FULL:
                 print("", flush=True, end="")

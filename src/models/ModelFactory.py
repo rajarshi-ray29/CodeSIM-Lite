@@ -1,6 +1,7 @@
 from models.Gemini import *
 from models.OpenAI import *
 from models.GroqModel import *
+from models.DeepSeek import *
 
 
 class ModelFactory:
@@ -9,6 +10,8 @@ class ModelFactory:
         model_name = model_name.lower()
         if model_name == "gemini":
             return Gemini
+        if model_name == "dsr1":
+            return DeepSeek
         if model_name == "llama70b":
             return LLaMa370B
         if model_name == "llama8b":

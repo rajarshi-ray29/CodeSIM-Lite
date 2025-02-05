@@ -59,6 +59,7 @@ parser.add_argument(
     type=str,
     default="ChatGPT",
     choices=[
+        "DSR1",
         "ChatGPT",
         "ChatGPT2",
         "ChatGPT3",

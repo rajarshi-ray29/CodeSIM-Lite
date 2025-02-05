@@ -29,7 +29,7 @@ class SCoder(DirectStrategy):
     def __init__(
         self,
         additional_info_run=0,
-        max_plan_try=1,
+        max_plan_try=5,
         max_debug_try=5,
         *args,
         **kwargs
@@ -41,7 +41,7 @@ class SCoder(DirectStrategy):
         self.max_plan_try=max_plan_try
         self.max_debug_try=max_debug_try
 
-        self.is_competative = type(self.data) == APPSDataset or \
+        self.is_competitive = type(self.data) == APPSDataset or \
             type(self.data) == CodeContestDataset or \
             type(self.data) == XCodeDataset
 
@@ -102,7 +102,7 @@ class SCoder(DirectStrategy):
             self.language
         )
 
-        if self.is_competative:
+        if self.is_competitive:
             test_log_sample = test_log_sample[test_log_sample.find("## Tests failed:"):]
             test_log = test_log_sample + test_log_additional
         else:
@@ -118,7 +118,7 @@ class SCoder(DirectStrategy):
 
         std_input_prompt = ""
 
-        if self.is_competative:
+        if self.is_competitive:
             std_input_prompt = \
 """- Strictly follow the sample input and output format. 
     - The input should be taken from Standard input and output should be given to standard output. If you are writing a function then after the function definition take the input using `input()` function then call the function with specified parameters and finally print the output of the function. 
