@@ -15,10 +15,10 @@
 ## News
 
 - 🎉 CodeSIM got accepted on NAACL 2025 Findings.
-- [📢](https://emojipedia.org/loudspeaker) Full results log can be found [here](https://huggingface.co/ashraful/CodeSIM/tree/main/results).
-- [📢](https://emojipedia.org/loudspeaker) Added CodeSIM outperforming MapCoder.
+- 📢 Full results log can be found [here](https://huggingface.co/ashraful/CodeSIM/tree/main/results).
+- 📢 Added CodeSIM outperforming MapCoder.
 - 🎉 MapCoder got accepted on [ACL 2024](https://aclanthology.org/2024.acl-long.269/).
-- [📢](https://emojipedia.org/loudspeaker) All our codebase is open-sourced with MIT License.
+- 📢 All our codebase is open-sourced with MIT License.
 
 ## Abstract
 
