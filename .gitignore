@@ -24,4 +24,7 @@ temp.bat
 
 runs
 src/models/deepseekapi.py
-README copy.md
+
+*.sh 
+*.log
+*.bat
