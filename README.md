@@ -6,14 +6,16 @@
 # CodeSIM: Multi-Agent Code Generation and Problem Solving through Simulation-Driven Planning and Debugging
 
 <p align="center">
-• 🐱 <a href="https://github.com/kagnlp/CodeGenerator" target="_blank">Code</a> 
-• 📃 <a href="https://arxiv.org/abs/2502.05664" target="_blank">Paper</a>
+• 🐱 <a href="https://github.com/kagnlp/CodeGenerator" target="_blank">Code</a>
+• 📃 <a href="https://arxiv.org/abs/2502.05664" target="_blank">arXiv</a>
+• 🤗 <a href="https://huggingface.co/papers/2502.05664" target="_blank">Hugging face</a>
 • 🌐 <a href="https://kagnlp.github.io/codesim.github.io/" target="_blank">Website</a>
 </p>
 
 ## News
 
 - 🎉 CodeSIM is accepted on NAACL 2025 Findings.
+- Full results log can be found [here](https://huggingface.co/ashraful/CodeSIM/tree/main/results).
 - Added CodeSIM outperforming MapCoder.
 - 🎉 MapCoder is got accepted on [ACL 2024](https://aclanthology.org/2024.acl-long.269/).
 - All our codebase is open-sourced with MIT License.
