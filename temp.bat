@@ -1,1 +1,0 @@
-wsl docker run -v /mnt/c/Users/CSE2/Desktop/SCoder:/app ganler/evalplus:latest --dataset humaneval --samples /app/results/HumanEval/SCoder/LLaMa8B/Python3-0-0.95-1/Run-1/Results-EP.jsonl > C:/Users/CSE2/Desktop/SCoder/results/HumanEval/SCoder/LLaMa8B/Python3-0-0.95-1/Run-1/Summary-EP.txt
