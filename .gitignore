@@ -14,17 +14,3 @@ results/*
 outputs/*
 
 costing*.csv
-src/models/openaiapi.py
-src/models/geminiapi.py
-src/models/groqapi.py
-
-*.bat
-
-temp.bat
-
-runs
-src/models/deepseekapi.py
-
-*.sh 
-*.log
-*.bat
