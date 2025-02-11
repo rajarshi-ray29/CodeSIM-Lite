@@ -4,13 +4,16 @@ __pycache__
 .vscode
 *workspace*
 
-samples/*
+samples
 desktop.ini
-logs/*
+logs
 
 test*
 
-results/*
-outputs/*
+results
+outputs
 
 costing*.csv
+usage*.csv
+
+.venv
