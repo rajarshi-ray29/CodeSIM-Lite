@@ -6,7 +6,7 @@
 # CodeSIM: Multi-Agent Code Generation and Problem Solving through Simulation-Driven Planning and Debugging
 
 <p align="center">
-• 🐱 <a href="https://github.com/kagnlp/CodeGenerator" target="_blank">Code</a>
+• 👨‍💻 <a href="https://github.com/kagnlp/CodeGenerator" target="_blank">Code</a>
 • 📃 <a href="https://arxiv.org/abs/2502.05664" target="_blank">arXiv</a>
 • 🤗 <a href="https://huggingface.co/papers/2502.05664" target="_blank">Hugging face</a>
 • 🌐 <a href="https://kagnlp.github.io/codesim.github.io/" target="_blank">Website</a>
