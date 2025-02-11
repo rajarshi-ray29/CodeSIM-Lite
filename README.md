@@ -14,10 +14,10 @@
 
 ## News
 
-- 🎉 CodeSIM got accepted on NAACL 2025 Findings.
+- 🎉 CodeSIM got accepted in NAACL 2025 Findings.
 - 📢 Full results log can be found [here](https://huggingface.co/ashraful/CodeSIM/tree/main/results).
 - 📢 Added CodeSIM outperforming MapCoder.
-- 🎉 MapCoder got accepted on [ACL 2024](https://aclanthology.org/2024.acl-long.269/).
+- 🎉 MapCoder got accepted in [ACL 2024](https://aclanthology.org/2024.acl-long.269/).
 - 📢 All our codebase is open-sourced with MIT License.
 
 ## Abstract
