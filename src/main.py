@@ -1,3 +1,6 @@
+import dotenv
+dotenv.load_dotenv()
+
 import argparse
 import sys
 from datetime import datetime
@@ -20,7 +23,6 @@ from utils.evaluateET import generate_et_dataset_human
 from utils.evaluateET import generate_et_dataset_mbpp
 from utils.generateEP import generate_ep_dataset_human
 from utils.generateEP import generate_ep_dataset_mbpp
-
 
 parser = argparse.ArgumentParser()
 
@@ -46,50 +48,23 @@ parser.add_argument(
         "SelfPlanning",
         "Analogical",
         "MapCoder",
-        "SCoder",
-        "SCoderWD",
-        "SCoderWPV",
-        "SCoderWPVD",
-        "SCoderA",
-        "SCoderC",
+        "CodeSIM",
+        "CodeSIMWD",
+        "CodeSIMWPV",
+        "CodeSIMWPVD",
+        "CodeSIMA",
+        "CodeSIMC",
     ]
 )
 parser.add_argument(
     "--model",
     type=str,
     default="ChatGPT",
-    choices=[
-        "DSR1",
-        "ChatGPT",
-        "ChatGPT2",
-        "ChatGPT3",
-        "ChatGPT11061",
-        "ChatGPT11062",
-        "ChatGPT11063",
-        "GPT4c1",
-        "GPT4c2",
-        "GPT4c3",
-        "GPT4c4",
-        "GPT4c5",
-        "GPT4c6",
-        "GPT41",
-        "GPT42",
-        "GPT43",
-        "GPT44",
-        "GPT4T",
-        "GPT4ol",
-        "GPT4ol2",
-        "GPT4ol3",
-        "GPT4ol4",
-        "GPT4ol5",
-        "GPT4ol6",
-        "Gemini",
-        "LLaMa8B",
-        "LLaMa70B",
-        "Mixtral",
-        "Gemma",
-        "OpenAI",
-    ]
+)
+parser.add_argument(
+    "--model_provider",
+    type=str,
+    default="OpenAI",
 )
 parser.add_argument(
     "--temperature",
@@ -168,6 +143,7 @@ args = parser.parse_args()
 DATASET = args.dataset
 STRATEGY = args.strategy
 MODEL_NAME = args.model
+MODEL_PROVIDER_NAME = args.model_provider
 TEMPERATURE = args.temperature
 TOP_P = args.top_p
 PASS_AT_K = args.pass_at_k
@@ -212,7 +188,11 @@ Experiment start {RUN_NAME}, Time: {datetime.now()}
 """)
 
 strategy = PromptingFactory.get_prompting_class(STRATEGY)(
-    model=ModelFactory.get_model_class(MODEL_NAME)(temperature=TEMPERATURE, top_p=TOP_P),
+    model=ModelFactory.get_model_class(MODEL_PROVIDER_NAME)(
+        model_name=MODEL_NAME, 
+        temperature=TEMPERATURE, 
+        top_p=TOP_P
+    ),
     data=DatasetFactory.get_dataset_class(DATASET)(),
     language=LANGUAGE,
     pass_at_k=PASS_AT_K,

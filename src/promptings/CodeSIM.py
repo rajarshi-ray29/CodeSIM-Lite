@@ -25,10 +25,10 @@ from evaluations.func_evaluate import evaluate_io
 from utils.parse import parse_response
 from constants.verboseType import *
 
-class SCoderA(DirectStrategy):
+class CodeSIM(DirectStrategy):
     def __init__(
         self,
-        additional_info_run=2,
+        additional_info_run=0,
         max_plan_try=5,
         max_debug_try=5,
         *args,
@@ -41,19 +41,14 @@ class SCoderA(DirectStrategy):
         self.max_plan_try=max_plan_try
         self.max_debug_try=max_debug_try
 
-        self.is_competative = type(self.data) == APPSDataset or \
+        self.is_competitive = type(self.data) == APPSDataset or \
             type(self.data) == CodeContestDataset or \
             type(self.data) == XCodeDataset
-
-        # Cost reduction for competative programming
-        if self.is_competative:
-            self.max_plan_try = 3
-            self.max_debug_try = 3
 
 
         if self.verbose >= VERBOSE_FULL:
             print("\n\n" + "_" * 70)
-            print(f"Running SCoder with additional_info_run={additional_info_run}, max_plan_try={self.max_plan_try}, max_debug_try={self.max_debug_try}")
+            print(f"Running CodeSIM with additional_info_run={additional_info_run}, max_plan_try={self.max_plan_try}, max_debug_try={self.max_debug_try}")
             print("\n", flush=True)
 
 
@@ -77,7 +72,7 @@ class SCoderA(DirectStrategy):
             if test_log.startswith("Failed"):
                 falied_test_cases.append(test_log[test_log.index("assert"):])
         
-        return f"Test Cases where the generated code failed to generate the expected output:\n{"\n".join(falied_test_cases)}"
+        return f"### Test Cases where the generated code failed to generate the expected output:\n{"\n".join(falied_test_cases)}"
 
 
     def parse_test_cases(self, test_cases: str):
@@ -107,7 +102,7 @@ class SCoderA(DirectStrategy):
             self.language
         )
 
-        if self.is_competative:
+        if self.is_competitive:
             test_log_sample = test_log_sample[test_log_sample.find("## Tests failed:"):]
             test_log = test_log_sample + test_log_additional
         else:
@@ -123,58 +118,70 @@ class SCoderA(DirectStrategy):
 
         std_input_prompt = ""
 
-        if self.is_competative:
-            std_input_prompt = "- Strictly follow the input and output format. The input should be taken from Standard input and output should be given to standard output. If you are writing a function then after the function definition take input using `input()` function then call the function with specified parameters and finally print the output of the function. Do not add extra print statement otherwise it will failed the test cases."
+        if self.is_competitive:
+            std_input_prompt = \
+"""- Strictly follow the sample input and output format. 
+    - The input should be taken from Standard input and output should be given to standard output. If you are writing a function then after the function definition take the input using `input()` function then call the function with specified parameters and finally print the output of the function. 
+    - For array input parse the array then pass it to the function. Parsing technique is given in the sample input output format section.
+    - Do not add extra print statement otherwise it will failed the test cases."""
 
             problem = problem[:problem.find("-------\nImportant Note:")]
 
-        additional_io = None
+        additional_io = []
 
-        # Additional IO collection
-        for idx in range(1, self.additional_info_run + 1):
-            # Additional IO
-            additional_io_generation_input = [
-                {
-                    "role": "user",
-                    "content": prompt_for_additional_io.format(
-                        problem=problem,
-                        problem_name=data_row["entry_point"],
-                    ),
-                },
-            ]
+        # if type(self.data) == MBPPDataset:
 
-            if self.verbose >= VERBOSE_FULL:
-                print("\n\n" + "_" * 70)
-                print(f"Input for Additional IO Generation: {idx}\n\n")
-                print(additional_io_generation_input[0]['content'], flush=True)
+        #     # Additional IO collection
+        #     for idx in range(1, self.additional_info_run + 1):
+        #         # Additional IO
+        #         additional_io_generation_input = [
+        #             {
+        #                 "role": "user",
+        #                 "content": prompt_for_additional_io.format(
+        #                     problem=problem,
+        #                     problem_name=data_row["entry_point"],
+        #                 ),
+        #             },
+        #         ]
 
-            response = self.gpt_chat(
-                processed_input=additional_io_generation_input,
-                frequency_penalty=0.2
-            )
+        #         if self.verbose >= VERBOSE_FULL:
+        #             print("\n\n" + "_" * 70)
+        #             print(f"Input for Additional IO Generation: {idx}\n\n")
+        #             print(additional_io_generation_input[0]['content'], flush=True)
 
-            if self.verbose >= VERBOSE_FULL:
-                print("\n\n" + "_" * 70)
-                print(f"Response from Additional IO Generation: {idx}\n\n")
-                print(response, flush=True)
+        #         response = self.gpt_chat(
+        #             processed_input=additional_io_generation_input,
+        #             frequency_penalty=0.2
+        #         )
 
-            additional_io_response = response
+        #         if self.verbose >= VERBOSE_FULL:
+        #             print("\n\n" + "_" * 70)
+        #             print(f"Response from Additional IO Generation: {idx}\n\n")
+        #             print(response, flush=True)
 
-            # Applying intersection for self-consistancy
-            if additional_io is None:
-                additional_io = set(self.parse_test_cases(
-                    test_cases=additional_io_response
-                ))
-            else:
-                additional_io_ = self.parse_test_cases(
-                    test_cases=additional_io_response
-                )
-                additional_io = additional_io.intersection(set(additional_io_))
+        #         additional_io_response = response
 
-        additional_io = list(additional_io)
-        if self.verbose >= VERBOSE_FULL:
-            print(f"Additional IOs:")
-            print(additional_io, flush=True)
+        #         # Applying intersection for self-consistancy
+        #         if additional_io is None:
+        #             additional_io = set(self.parse_test_cases(
+        #                 test_cases=additional_io_response
+        #             ))
+        #         else:
+        #             additional_io_ = self.parse_test_cases(
+        #                 test_cases=additional_io_response
+        #             )
+        #             additional_io = additional_io.intersection(set(additional_io_))
+
+        #     additional_io = list(additional_io)
+        #     if self.verbose >= VERBOSE_FULL:
+        #         print(f"Additional IOs:")
+        #         print(additional_io, flush=True)
+
+        #     # Forcing no sample io as MBPP contains no sample io
+        #     data_row['sample_io'] = []
+
+        # else:
+        #     additional_io = []
         
         self.run_details["additional_io"] = additional_io
 
@@ -187,7 +194,7 @@ class SCoderA(DirectStrategy):
             input_for_planning = [
                 {
                     "role": "user",
-                    "content": prompt_for_planning_competative.format(
+                    "content": prompt_for_planning.format(
                         problem=problem,
                         language=self.language,
                     )
@@ -370,112 +377,7 @@ class SCoderA(DirectStrategy):
         return code
 
 
-prompt_for_additional_io = """You are a tester tasked with creating comprehensive unit test cases for a given programming problem.
-
-## Problem
-
-def maximum_segments(n, a, b, c):
-    '''
-    Write a Python function to find the maximum number of segments of lengths a, b, and c
-    that can be formed from n.
-    '''
-
-### Problem Understanding
-
-The task is to maximize the number of segments you can cut from a total length `n`, where the possible segment lengths are `a`, `b`, and `c`. Let say we have a rope of length `n` meter. We need to cut it into segments. Possible segment length is `a`, `b`, and `c`. There may be many possible way of doing these segments. We need to find out the maximum number of segments from that rope.
-
-### Test Cases
-assert maximum_segments(7, 5, 2, 5) == 2
-assert maximum_segments(17, 2, 1, 3) == 17
-assert maximum_segments(18, 16, 3, 6) == 6
-assert maximum_segments(11, 8, 4, 9) == -1
-assert maximum_segments(5, 9, 6, 10) == -1
-
----
-
-## Problem
-
-{problem}
-
---------
-**Important Instruction:**
-For the problem `{problem_name}`
-    - First, understand the problem `{problem_name}` and write down the understanding inside **Problem Understanding** section. 
-    - Then Generate five (05) unit test cases that cover both:
-        - **Normal** and **Edge** case scenarios
-        - **Positive** and **Negative** case scenarios
-        - **Valid** and **Invalid** case scenarios
-    inside **Test Cases** section.
-    - Write down each test case in a single line following the pattern shown in the example problem.
-    - Do not generate any code to solve this problem.
-"""
-
-
-prompt_for_initial_code_generation = """{problem}
-
---------
-Important Instructions:
-- Generate {language} code step-by-step to solve the above mentioned problem.
-- Do not generate any explanation.
-- The generated **{language}** code must be enclosed within triple backticks (```).
-{std_input_prompt}"""
-
-
-prompt_for_code_validation = """You are a tester tasked with checking a code for a given problem. 
-
----
-
-## Problem
-
-{problem}
-
-## Code
-
-{code}
-
----
-
-**Your output must follow the steps below:**
-- Try to generate a test case other than the sample test cases that are mentioned inside the problem.
-- Take a the input and apply the code step by step to get the output.
-- Compare the generated output with the expected output to verify if the generated code is ok or not.
-- Write **Buggy Code** if you find such a test case otherwise write **Code is ok**.
-"""
-
-
 prompt_for_planning = """You are a programmer tasked with generating appropriate plan to solve a given problem using the **{language}** programming language.
-
-## Problem
-
-{problem}
-
-**Expected Output:**
-
-Your response must be structured as follows:
-
-### Problem Understanding
-
-Think about the original problem. Develop an initial understanding about the problem.
-
-### Recall Example Problem
-
-Recall a relevant and distinct problems (different from problem mentioned above) and
-- describe it
-- generate {language} code step by step to solve that problem
-- finally generate a planning to solve that problem
-
-### Plan
-
-- Write down a detailed, step-by-step plan to solve the **original problem**.
-
---------
-**Important Instruction:**
-- Strictly follow the instructions.
-- Do not generate code.
-"""
-
-
-prompt_for_planning_competative = """You are a programmer tasked with generating appropriate plan to solve a given problem using the **{language}** programming language.
 
 ## Problem
 
@@ -525,7 +427,7 @@ Your response must be structured as follows:
 
 ### Simulation
 
-- Take a sample input and apply plan step by step to get the output.
+- Take a sample input and apply plan step by step to get the output. Do not generate code do it manually by applying reasoning.
 - Compare the generated output with the sample output to verify if your plan works as expected.
 
 ### Plan Evaluation
@@ -536,7 +438,7 @@ Your response must be structured as follows:
 """
 
 
-prompt_for_plan_refinement = """You are a programmer tasked with generating appropriate plan to solve a given problem using the **{language}** programming language. You already have a wrong plan. Correct it so that it can generate correct code.
+prompt_for_plan_refinement = """You are a programmer tasked with generating appropriate plan to solve a given problem using the **{language}** programming language. You already have a wrong plan. Correct it so that it can generate correct plan.
 
 {problem_with_planning}
 
@@ -582,8 +484,6 @@ prompt_for_debugging = """You are a programmer who has received a solution of a 
 {code}
 ```
 
-### Test Report
-
 {test_log}
 
 **Expected Output:**
@@ -591,16 +491,15 @@ prompt_for_debugging = """You are a programmer who has received a solution of a 
 Your response must be structured as follows:
 
 ### Simulation with failed test case
-To detect where is the bug:
+To detect where is the bug follow following steps:
     - Take a sample test case where it fails.
     - Take the input go through each step according to the plan
-    - You will get a output that must be different from the expected output. 
+    - You will get a output that must be different from the expected output.
 
 ### Debugging Notes
-Based on this simulation detect any of the following cases:
+- Based on this simulation detect any of the following cases:
     - Plan is wrong
     - Plan is correct but plan to code generation is wrong.
-
 - Finally, discuss how to correct this code.
 
 ### Modified Code
@@ -615,6 +514,7 @@ Based on this simulation detect any of the following cases:
 - Do not add testing code for example assert statement in your code.
 - Do not be overconfident that the generated code is correct. It is wrong.
 - The modified **{language}** code must be enclosed within triple backticks (```).
-- Your response must contain **Simulation with failed test case**, **Debugging Notes**, and **Modified Code** section.
+- Your response must contain **Simulation with failed test case**, **Debugging Notes**,
+and **Modified Code** section.
 {std_input_prompt}"""
 

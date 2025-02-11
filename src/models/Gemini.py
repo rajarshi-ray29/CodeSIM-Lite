@@ -7,13 +7,15 @@ from tenacity import retry, stop_after_attempt, wait_random_exponential
 
 from .Base import BaseModel
 
-from .geminiapi import api_key
+api_key = os.getenv("GEMINI_API_KEY")
 
 genai.configure(api_key=api_key)
-model_name="gemini-1.5-flash"
 
 class Gemini(BaseModel):
-    def __init__(self, sleep_time=0, **kwargs):
+    def __init__(self, model_name, sleep_time=0, **kwargs):
+        if model_name is None:
+            raise Exception("Model name is required")
+        
         self.model_name = kwargs.get("model_name", model_name)
         self.api_key = kwargs.get("api_key", api_key)
         self.temperature = kwargs.get("temperature", 0.0)

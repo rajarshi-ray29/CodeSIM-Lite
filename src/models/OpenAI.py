@@ -7,11 +7,20 @@ from tenacity import retry, stop_after_attempt, wait_random_exponential
 
 from .Base import BaseModel
 
-from .openaiapi import *
-
 import os
-from openai import AzureOpenAI
+from openai import OpenAI, AzureOpenAI
 import time
+
+usage_log_file_path = "usage_log.csv"
+api_type = os.getenv("API_TYPE")
+
+if api_type == "openai":
+    api_key = os.getenv("OPENAI_API_KEY")
+    api_base = os.getenv("OPENAI_API_URL")
+elif api_type == "azure":
+    api_key = os.getenv("AZURE_API_KEY")
+    api_base = os.getenv("AZURE_API_URL")
+    api_version = os.getenv("AZURE_API_VERSION")
 
 
 class OpenAIModel(BaseModel):
@@ -30,14 +39,22 @@ class OpenAIModel(BaseModel):
         pass
 
 
-class GPTV1Base(OpenAIModel):
-    def __init__(self, model, sleep_time=0, **kwargs):
-        self.model = model
-        self.client = AzureOpenAI(
-            azure_endpoint=self.model["end_point"],
-            api_version=self.model["api_version"],
-            api_key=self.model["api_key"]
-        )
+class OpenAIV1Model(OpenAIModel):
+    def __init__(self, model_name, sleep_time=0, **kwargs):
+        
+        if model_name is None:
+            raise Exception("Model name is required")
+        
+        if api_type == "azure":
+            self.client = AzureOpenAI(
+                api_key=api_key,
+                api_version=api_version,
+                azure_endpoint=api_base
+            )
+        else:
+            self.client = OpenAI(api_key=api_key)
+
+        self.model_name = model_name
 
         self.temperature = kwargs.get("temperature", 0.0)
         self.top_p = kwargs.get("top_p", 0.95)
@@ -59,7 +76,7 @@ class GPTV1Base(OpenAIModel):
         start_time = time.perf_counter()
         
         response = self.client.chat.completions.create(
-            model=self.model["deployment"],
+            model=self.model_name,
             messages=processed_input,
             max_tokens=self.max_tokens,
             temperature=self.temperature,
@@ -72,14 +89,8 @@ class GPTV1Base(OpenAIModel):
 
         end_time = time.perf_counter()
 
-        cost = 0
-        cost += (self.model["prompt_token_cost"] *
-                 response.usage.prompt_tokens) / 1e6
-        cost += (self.model["completion_token_cost"] *
-                 response.usage.completion_tokens) / 1e6
-
-        with open(cost_log_file_path, mode="a") as file:
-            file.write(f'{self.model["name"]},{response.usage.prompt_tokens},{response.usage.completion_tokens},{cost}\n')
+        with open(usage_log_file_path, mode="a") as file:
+            file.write(f'{self.model_name},{response.usage.prompt_tokens},{response.usage.completion_tokens}\n')
         
         run_details = {
             "api_calls": 1,
@@ -87,11 +98,10 @@ class GPTV1Base(OpenAIModel):
 
             "prompt_tokens": response.usage.prompt_tokens,
             "completion_tokens": response.usage.completion_tokens,
-            "cost": cost,
 
             "details": [
                 {
-                    "model_name": self.model["name"],
+                    "model_name": self.model_name,
                     "model_prompt": processed_input,
                     "model_response": response.choices[0].message.content,                    
                     "max_tokens": self.max_tokens,
@@ -105,104 +115,20 @@ class GPTV1Base(OpenAIModel):
 
         return response.choices[0].message.content, run_details 
 
-
-class ChatGPT(GPTV1Base):
-    def __init__(self, **kwargs):
-        super().__init__(model=chatgpt, sleep_time=0, **kwargs)
-
-
-class ChatGPT2(GPTV1Base):
-    def __init__(self, **kwargs):
-        super().__init__(model=chatgpt2, sleep_time=10, **kwargs)
-
-
-
-class ChatGPT3(GPTV1Base):
-    def __init__(self, **kwargs):
-        super().__init__(model=chatgpt3, sleep_time=0, **kwargs)
-
-
-class ChatGPT11061(GPTV1Base):
-    def __init__(self, **kwargs):
-        super().__init__(model=chatgpt11061, sleep_time=0, **kwargs)
-
-
-class ChatGPT11062(GPTV1Base):
-    def __init__(self, **kwargs):
-        super().__init__(model=chatgpt11062, sleep_time=0, **kwargs)
-
-
-class ChatGPT11063(GPTV1Base):
-    def __init__(self, **kwargs):
-        super().__init__(model=chatgpt11063, sleep_time=0, **kwargs)
-
-
-class GPT4c1(GPTV1Base):
-    
-    def __init__(self, **kwargs):
-        super().__init__(model=gpt4c1, sleep_time=0, **kwargs)
-
-class GPT4c2(GPTV1Base):
-    
-    def __init__(self, **kwargs):
-        super().__init__(model=gpt4c2, sleep_time=0, **kwargs)
-
-class GPT4c3(GPTV1Base):
-    
-    def __init__(self, **kwargs):
-        super().__init__(model=gpt4c3, sleep_time=0, **kwargs)
-
-
-class GPT4c4(GPTV1Base):
-    
-    def __init__(self, **kwargs):
-        super().__init__(model=gpt4c4, sleep_time=0, **kwargs)
-
-class GPT4c5(GPTV1Base):
-    
-    def __init__(self, **kwargs):
-        super().__init__(model=gpt4c5, sleep_time=0, **kwargs)
-
-class GPT4c6(GPTV1Base):
-    
-    def __init__(self, **kwargs):
-        super().__init__(model=gpt4c6, sleep_time=0, **kwargs)
-
-
-
-class GPT41(GPTV1Base):
-    
-    def __init__(self, **kwargs):
-        super().__init__(model=gpt4, sleep_time=0, **kwargs)
-
-
-class GPT42(GPTV1Base):
-    
-    def __init__(self, **kwargs):
-        super().__init__(model=gpt42, sleep_time=0, **kwargs)
-
-
-class GPT43(GPTV1Base):
-    
-    def __init__(self, **kwargs):
-        super().__init__(model=gpt43, sleep_time=0, **kwargs)
-
-
-class GPT44(GPTV1Base):
-    
-    def __init__(self, **kwargs):
-        super().__init__(model=gpt44, sleep_time=0, **kwargs)
-
-
-class GPTV2Base(OpenAIModel):
-    def __init__(self, model, sleep_time=60, **kwargs):
-        self.model = model
+# This class is intended for only azure openai api for some special cases
+# Do not use this class for openai api
+class OpenAIV2Model(OpenAIModel):
+    def __init__(self, model_name, sleep_time=60, **kwargs):
+        if model_name is None:
+            raise Exception("Model name is required")
+        
+        self.model_name = model_name
 
         self.headers = {
             "Content-Type": "application/json",
-            "api-key": kwargs.get("api-key", self.model["api_key"]),
+            "api-key": kwargs.get("api-key", api_key),
         }
-        self.end_point = kwargs.get("end_point", self.model["end_point"])
+        self.end_point = kwargs.get("end_point", api_base)
 
         self.temperature = kwargs.get("temperature", 0.0)
         self.top_p = kwargs.get("top_p", 0.95)
@@ -234,8 +160,7 @@ class GPTV2Base(OpenAIModel):
 
         start_time = time.perf_counter()
 
-        response = requests.post(
-            self.end_point, headers=self.headers, json=payload)
+        response = requests.post(self.end_point, headers=self.headers, json=payload)
         # Will raise an HTTPError if the HTTP request returned an unsuccessful status code
         response.raise_for_status()
 
@@ -244,14 +169,8 @@ class GPTV2Base(OpenAIModel):
         # Handle the response as needed (e.g., print or process)
         response = response.json()
 
-        cost = 0
-        cost += (self.model["prompt_token_cost"] *
-                 response["usage"]["prompt_tokens"]) / 1e6
-        cost += (self.model["completion_token_cost"] *
-                 response["usage"]["completion_tokens"]) / 1e6
-
-        with open(cost_log_file_path, mode="a") as file:
-            file.write(f'{self.model["name"]},{response["usage"]["prompt_tokens"]},{response["usage"]["completion_tokens"]},{cost}\n')
+        with open(usage_log_file_path, mode="a") as file:
+            file.write(f'{self.model_name},{response["usage"]["prompt_tokens"]},{response["usage"]["completion_tokens"]}\n')
 
         run_details = {
             "api_calls": 1,
@@ -259,11 +178,10 @@ class GPTV2Base(OpenAIModel):
 
             "prompt_tokens": response["usage"]["prompt_tokens"],
             "completion_tokens": response["usage"]["completion_tokens"],
-            "cost": cost,
 
             "details": [
                 {
-                    "model_name": self.model["name"],
+                    "model_name": self.model_name,
                     "model_prompt": processed_input,
                     "model_response": response["choices"][0]["message"]["content"],                    
                     "max_tokens": self.max_tokens,
@@ -276,42 +194,4 @@ class GPTV2Base(OpenAIModel):
         }
 
         return response["choices"][0]["message"]["content"], run_details
-
-
-class GPT4ol4(GPTV2Base):
-    def __init__(self, **kwargs):
-        super().__init__(model=gpt4o, **kwargs)
-
-
-class GPT4ol5(GPTV2Base):
-    def __init__(self, **kwargs):
-        super().__init__(model=gpt4o2, **kwargs)
-
-
-class GPT4ol6(GPTV2Base):
-    def __init__(self, **kwargs):
-        super().__init__(model=gpt4o3, **kwargs)
-
-
-class GPT4ol(GPTV2Base):
-    def __init__(self, **kwargs):
-        super().__init__(model=gpt4ol, sleep_time=30, **kwargs)
-
-
-class GPT4ol2(GPTV2Base):
-    def __init__(self, **kwargs):
-        super().__init__(model=gpt4ol2, sleep_time=30, **kwargs)
-
-
-class GPT4ol3(GPTV2Base):
-    def __init__(self, **kwargs):
-        super().__init__(model=gpt4ol3, sleep_time=30, **kwargs)
-
-
-
-
-class GPT4T(GPTV2Base):
-    
-    def __init__(self, **kwargs):
-        super().__init__(model=gpt4T, **kwargs)
 

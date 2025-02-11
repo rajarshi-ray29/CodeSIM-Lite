@@ -5,7 +5,7 @@ windows = False
 def run_eval_plus(RESULTS_PATH, SUMMARY_PATH, DATASET):
 
     if windows:
-        command = f"wsl docker run -v /mnt/c/Users/CSE2/Desktop/SCoder:/app ganler/evalplus:latest --dataset {DATASET} --samples /app/{RESULTS_PATH} > C:/Users/CSE2/Desktop/SCoder/{SUMMARY_PATH}\n"
+        command = f"wsl docker run -v /mnt/c/Users/CSE2/Desktop/CodeSIM:/app ganler/evalplus:latest --dataset {DATASET} --samples /app/{RESULTS_PATH} > C:/Users/CSE2/Desktop/CodeSIM/{SUMMARY_PATH}\n"
 
         with open("temp.bat", mode="w", encoding="utf-8") as file:
             file.write(command)   
@@ -19,7 +19,7 @@ def run_eval_plus(RESULTS_PATH, SUMMARY_PATH, DATASET):
             print("Error Occured")
             print(e)
     else:
-        command = f"docker run -v /home/ashraful/prompting/SCoder:/app ganler/evalplus:latest --dataset {DATASET} --samples /app/{RESULTS_PATH} > /home/ashraful/prompting/SCoder/{SUMMARY_PATH}\n"
+        command = f"docker run -v /home/ashraful/prompting/CodeSIM:/app ganler/evalplus:latest --dataset {DATASET} --samples /app/{RESULTS_PATH} > /home/ashraful/prompting/CodeSIM/{SUMMARY_PATH}\n"
 
         with open("temp.sh", mode="w", encoding="utf-8") as file:
             file.write(command)   

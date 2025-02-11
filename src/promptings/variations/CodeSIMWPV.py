@@ -25,7 +25,7 @@ from evaluations.func_evaluate import evaluate_io
 from utils.parse import parse_response
 from constants.verboseType import *
 
-class SCoderWPVD(DirectStrategy):
+class CodeSIMWPV(DirectStrategy):
     def __init__(
         self,
         additional_info_run=2,
@@ -53,7 +53,7 @@ class SCoderWPVD(DirectStrategy):
 
         if self.verbose >= VERBOSE_FULL:
             print("\n\n" + "_" * 70)
-            print(f"Running SCoder with additional_info_run={additional_info_run}, max_plan_try={self.max_plan_try}, max_debug_try={self.max_debug_try}")
+            print(f"Running CodeSIM with additional_info_run={additional_info_run}, max_plan_try={self.max_plan_try}, max_debug_try={self.max_debug_try}")
             print("\n", flush=True)
 
 
@@ -218,6 +218,46 @@ class SCoderWPVD(DirectStrategy):
             if passed:
                 break
 
+            # problem_with_solution = f"{problem_with_planning}\n\n### Code:\n\n```{self.language}\n{code}\n```"
+
+            # Debugging
+            for debug_no in range(1, self.max_debug_try + 1):
+                
+                input_for_debugging = [
+                    {
+                        "role": "user",
+                        "content": prompt_for_debugging.format(
+                            problem_with_planning=problem_with_planning,
+                            code=code,
+                            language=self.language,
+                            test_log=test_log,
+                            std_input_prompt=std_input_prompt,
+                        )
+                    }
+                ]
+
+                if self.verbose >= VERBOSE_FULL:
+                    print("\n\n" + "_" * 70)
+                    print(f"Input for Improving code: {plan_no}, {debug_no}\n\n")
+                    print(input_for_debugging[0]['content'], flush=True)
+
+                response = self.gpt_chat(input_for_debugging)
+
+                if self.verbose >= VERBOSE_FULL:
+                    print("\n\n" + "_" * 70)
+                    print(f"Response from Improving code: {plan_no}, {debug_no}\n\n")
+                    print(response, flush=True)
+
+                code = parse_response(response)
+
+                passed, test_log = self.check(data_row, additional_io, code)
+
+                # Passed so breaking this debugging loop
+                if passed:
+                    break
+            
+            if passed:
+                break
 
         if self.verbose >= VERBOSE_FULL:
             print("\n\n" + "_" * 70)

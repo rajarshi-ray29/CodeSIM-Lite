@@ -2,15 +2,14 @@ from promptings.CoT import CoTStrategy
 from promptings.Direct import DirectStrategy
 from promptings.Analogical import AnalogicalStrategy
 from promptings.SelfPlanning import SelfPlanningStrategy
-
-from promptings.SCoder import SCoder
-from promptings.SCoderA import SCoderA
-from promptings.SCoderC import SCoderC
-from promptings.SCoderWD import SCoderWD
-from promptings.SCoderWPV import SCoderWPV
-from promptings.SCoderWPVD import SCoderWPVD
 from promptings.MapCoder import MapCoder
 
+from src.promptings.CodeSIM import CodeSIM
+from src.promptings.variations.CodeSIMA import CodeSIMA
+from src.promptings.variations.CodeSIMC import CodeSIMC
+from src.promptings.variations.CodeSIMWD import CodeSIMWD
+from src.promptings.variations.CodeSIMWPV import CodeSIMWPV
+from src.promptings.variations.CodeSIMWPVD import CodeSIMWPVD
 
 class PromptingFactory:
     @staticmethod
@@ -25,17 +24,17 @@ class PromptingFactory:
             return AnalogicalStrategy
         elif prompting_name == "SelfPlanning":
             return SelfPlanningStrategy
-        elif prompting_name == "SCoder":
-            return SCoder
-        elif prompting_name == "SCoderC":
-            return SCoderC
-        elif prompting_name == "SCoderWD":
-            return SCoderWD
-        elif prompting_name == "SCoderWPV":
-            return SCoderWPV
-        elif prompting_name == "SCoderWPVD":
-            return SCoderWPVD
-        elif prompting_name == "SCoderA":
-            return SCoderA
+        elif prompting_name == "CodeSIM":
+            return CodeSIM
+        elif prompting_name == "CodeSIMA":
+            return CodeSIMA
+        elif prompting_name == "CodeSIMC":
+            return CodeSIMC
+        elif prompting_name == "CodeSIMWD":
+            return CodeSIMWD
+        elif prompting_name == "CodeSIMWPV":
+            return CodeSIMWPV
+        elif prompting_name == "CodeSIMWPVD":
+            return CodeSIMWPVD
         else:
             raise Exception(f"Unknown prompting name {prompting_name}")
