@@ -20,7 +20,7 @@ def gen_summary(results_path: str, summary_path: str):
     total_prompt_tokens = results['run_details'].apply(lambda x: sum(run['prompt_tokens'] for run in x)).sum()
     total_completion_tokens = results['run_details'].apply(lambda x: sum(run['completion_tokens'] for run in x)).sum()
     total_taken_time = results['run_details'].apply(lambda x: sum(run['taken_time'] for run in x)).sum()
-    total_cost = results['run_details'].apply(lambda x: sum(run['cost'] for run in x)).sum()
+    # total_cost = results['run_details'].apply(lambda x: sum(run['cost'] for run in x)).sum()
 
     average_prompt_tokens = total_prompt_tokens / len(results)
     average_completion_tokens = total_completion_tokens / len(results)
@@ -56,7 +56,7 @@ def gen_summary(results_path: str, summary_path: str):
         summary_file.write(f"{'Total Taken Time:':<{name_width}} {total_taken_time:>{value_width}.02f}s\n")
         summary_file.write(f"{'Average Taken Time:':<{name_width}} {average_taken_time:>{value_width}.02f}s\n")
         summary_file.write(f"\n")
-        summary_file.write(f"{'Total Cost:':<{name_width}} {total_cost:>{value_width}.02f}\n")
+        # summary_file.write(f"{'Total Cost:':<{name_width}} {total_cost:>{value_width}.02f}\n")
         summary_file.write(f"\n")
         summary_file.write(f"{'Total Api Calls:':<{name_width}} {total_api_calls:>{value_width}.02f}\n")
         summary_file.write(f"{'Max Api Calls:':<{name_width}} {max_api_calls:>{value_width}}\n")

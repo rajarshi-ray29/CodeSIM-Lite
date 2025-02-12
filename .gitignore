@@ -17,3 +17,5 @@ costing*.csv
 usage*.csv
 
 .venv
+
+temp*
