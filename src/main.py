@@ -153,7 +153,7 @@ RESULT_LOG_MODE = args.result_log
 VERBOSE = int(args.verbose)
 STORE_LOG_IN_FILE = args.store_log_in_file
 
-MODEL_NAME_FOR_RUN = MODEL_NAME[:-1] + ('' if MODEL_NAME[-1].isdigit() else MODEL_NAME[-1])
+MODEL_NAME_FOR_RUN = MODEL_NAME
 
 RUN_NAME = f"results/{DATASET}/{STRATEGY}/{MODEL_NAME_FOR_RUN}/{LANGUAGE}-{TEMPERATURE}-{TOP_P}-{PASS_AT_K}"
 
