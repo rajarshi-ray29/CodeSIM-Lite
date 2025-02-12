@@ -4,6 +4,10 @@ import re
 Retriving the code blocks from the response.
 """
 def parse_response(response: str) -> str:
+
+    if '<think>' in response and '</think>' in response:
+        response = response.split('</think>')[1]
+    
     if response is None:
         return ''
     
