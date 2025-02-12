@@ -54,7 +54,7 @@ The final component, the *Debugging Agent*, receives the original problem, the p
 
 <img src="images/contest-results.png" alt="Contest Results" style="width: 50%; display: block;margin-left: auto;margin-right: auto;"> 
 
-<img src="images/opensource-llm-results.png" alt="Contest Results" style="width: 50%; display: block;margin-left: auto;margin-right: auto;">     
+<img src="images/opensource-llm-results.png" alt="Contest Results" style="width: 60%; display: block;margin-left: auto;margin-right: auto;">     
 
 
 ## Running our project
