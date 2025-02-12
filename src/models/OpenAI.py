@@ -74,18 +74,27 @@ class OpenAIV1Model(OpenAIModel):
         time.sleep(self.sleep_time)
 
         start_time = time.perf_counter()
-        
-        response = self.client.chat.completions.create(
-            model=self.model_name,
-            messages=processed_input,
-            max_tokens=self.max_tokens,
-            temperature=self.temperature,
-            top_p=self.top_p,
-            frequency_penalty=frequency_penalty,
-            presence_penalty=presence_penalty,
-            stop=None,
-            stream=False
-        )
+
+        if self.model_name == "o3-mini":
+            response = self.client.chat.completions.create(
+                model=self.model_name,
+                messages=processed_input,
+                max_completion_tokens=self.max_tokens,
+                stop=None,
+                stream=False
+            )
+        else:
+            response = self.client.chat.completions.create(
+                model=self.model_name,
+                messages=processed_input,
+                max_tokens=self.max_tokens,
+                temperature=self.temperature,
+                top_p=self.top_p,
+                frequency_penalty=frequency_penalty,
+                presence_penalty=presence_penalty,
+                stop=None,
+                stream=False
+            )
 
         end_time = time.perf_counter()
 
