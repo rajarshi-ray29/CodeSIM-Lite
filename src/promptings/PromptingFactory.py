@@ -4,12 +4,12 @@ from promptings.Analogical import AnalogicalStrategy
 from promptings.SelfPlanning import SelfPlanningStrategy
 from promptings.MapCoder import MapCoder
 
-from src.promptings.CodeSIM import CodeSIM
-from src.promptings.variations.CodeSIMA import CodeSIMA
-from src.promptings.variations.CodeSIMC import CodeSIMC
-from src.promptings.variations.CodeSIMWD import CodeSIMWD
-from src.promptings.variations.CodeSIMWPV import CodeSIMWPV
-from src.promptings.variations.CodeSIMWPVD import CodeSIMWPVD
+from promptings.CodeSIM import CodeSIM
+from promptings.variations.CodeSIMA import CodeSIMA
+from promptings.variations.CodeSIMC import CodeSIMC
+from promptings.variations.CodeSIMWD import CodeSIMWD
+from promptings.variations.CodeSIMWPV import CodeSIMWPV
+from promptings.variations.CodeSIMWPVD import CodeSIMWPVD
 
 class PromptingFactory:
     @staticmethod

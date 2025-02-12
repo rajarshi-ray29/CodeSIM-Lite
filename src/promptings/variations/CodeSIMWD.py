@@ -9,8 +9,8 @@ import time
 from copy import deepcopy
 import xml.etree.ElementTree as ET
 
-from .Base import BaseStrategy
-from .Direct import DirectStrategy
+from ..Base import BaseStrategy
+from ..Direct import DirectStrategy
 from models.Base import BaseModel
 
 
@@ -71,14 +71,15 @@ class CodeSIMWD(DirectStrategy):
     @staticmethod
     def process_test_log(test_logs: str):
         passed_test_cases = []
-        falied_test_cases = []
+        failed_test_cases = []
         for test_log in test_logs.splitlines():
             if test_log.startswith("Passed"):
                 passed_test_cases.append(test_log[test_log.index("assert"):])
             if test_log.startswith("Failed"):
-                falied_test_cases.append(test_log[test_log.index("assert"):])
+                failed_test_cases.append(test_log[test_log.index("assert"):])
         
-        return f"Test Cases where the generated code failed to generate the expected output:\n{"\n".join(falied_test_cases)}"
+        failed_test_cases_str = "\n".join(failed_test_cases)
+        return f"### Test Cases where the generated code failed to generate the expected output:\n{failed_test_cases_str}"
 
 
     def parse_test_cases(self, test_cases: str):
