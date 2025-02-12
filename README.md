@@ -3,7 +3,7 @@
 - [Visit our webpage](https://kagnlp.github.io/codesim.github.io/)
 - Visit our paper for more details -->
 
-# CodeSIM: Multi-Agent Code Generation and Problem Solving through Simulation-Driven Planning and Debugging
+# CodeSim: Multi-Agent Code Generation and Problem Solving through Simulation-Driven Planning and Debugging
 
 <p align="center">
 • 👨‍💻 <a href="https://github.com/kagnlp/CodeGenerator" target="_blank">Code</a>
