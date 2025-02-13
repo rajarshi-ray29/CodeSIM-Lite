@@ -75,7 +75,7 @@ class OpenAIV1Model(OpenAIModel):
 
         start_time = time.perf_counter()
 
-        if self.model_name == "o3-mini":
+        if self.model_name == "o3-mini" or self.model_name == "o1":
             response = self.client.chat.completions.create(
                 model=self.model_name,
                 messages=processed_input,
