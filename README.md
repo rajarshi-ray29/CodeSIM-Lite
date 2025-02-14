@@ -13,10 +13,10 @@
 </p>
 
 ## News
-
-- 🎉 CodeSIM got accepted in NAACL 2025 Findings.
+- 📢 With o3-mini CodeSim achived a pass@1 score of 98.8 on HumanEval and became 2'nd in [PaperwithCode LeaderBoard](https://paperswithcode.com/sota/code-generation-on-humaneval). 
+- 🎉 CodeSim got accepted in NAACL 2025 Findings.
 - 📢 Full results log can be found [here](https://huggingface.co/ashraful/CodeSIM/tree/main/results).
-- 📢 Added CodeSIM outperforming MapCoder.
+- 📢 Added CodeSim outperforming MapCoder.
 - 🎉 MapCoder got accepted in [ACL 2024](https://aclanthology.org/2024.acl-long.269/).
 - 📢 All our codebase is open-sourced with MIT License.
 
