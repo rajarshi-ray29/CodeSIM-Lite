@@ -9,6 +9,7 @@
 • 👨‍💻 <a href="https://github.com/kagnlp/CodeGenerator" target="_blank">Code</a>
 • 📃 <a href="https://arxiv.org/abs/2502.05664" target="_blank">arXiv</a>
 • 🤗 <a href="https://huggingface.co/papers/2502.05664" target="_blank">Hugging face</a>
+• 📰 <a href="https://paperswithcode.com/paper/codesim-multi-agent-code-generation-and" target="_blank">Papers With Code</a>
 • 🌐 <a href="https://kagnlp.github.io/codesim.github.io/" target="_blank">Website</a>
 </p>
 
