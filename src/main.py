@@ -221,8 +221,8 @@ if "human" in DATASET.lower():
     generate_et_dataset_human(RESULTS_PATH, ET_RESULTS_PATH)
     gen_summary(ET_RESULTS_PATH, ET_SUMMARY_PATH)
 
-    generate_ep_dataset_human(RESULTS_PATH, EP_RESULTS_PATH)
-    run_eval_plus(EP_RESULTS_PATH, EP_SUMMARY_PATH, "humaneval")
+    # generate_ep_dataset_human(RESULTS_PATH, EP_RESULTS_PATH)
+    # run_eval_plus(EP_RESULTS_PATH, EP_SUMMARY_PATH, "humaneval")
 
 elif "mbpp" in DATASET.lower():
     generate_et_dataset_mbpp(RESULTS_PATH, ET_RESULTS_PATH)

@@ -23,12 +23,13 @@ class GroqModel(BaseModel):
         self.model_name = model_name        
         self.temperature = kwargs.get("temperature", 0.0)
         self.top_p = kwargs.get("top_p", 0.95)
-        self.max_tokens = kwargs.get("max_tokens", 4096)
+        self.max_tokens = kwargs.get("max_tokens", 16000)
         self.sleep_time = sleep_time
         self.api_key = api_key
 
         self.client = Groq(api_key=self.api_key)
 
+    @retry(wait=wait_random_exponential(min=600, max=3600), stop=stop_after_attempt(5))
     def prompt(
         self,
         processed_input: List[Dict],
