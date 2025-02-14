@@ -13,7 +13,7 @@
 </p>
 
 ## News
-- 📢 With o3-mini CodeSim achived a new pass@1 score of 98.8% on HumanEval and became 2'nd in [PaperwithCode LeaderBoard](https://paperswithcode.com/sota/code-generation-on-humaneval). 
+- 📢 With o3-mini CodeSim achived a new pass@1 score of 98.8% on HumanEval and became 2'nd in [PaperwithCode LeaderBoard](https://paperswithcode.com/sota/code-generation-on-humaneval) and this is even without using any external debuggers!
 - 🎉 CodeSim got accepted in NAACL 2025 Findings.
 - 📢 Full results log can be found [here](https://huggingface.co/ashraful/CodeSIM/tree/main/results).
 - 📢 Added CodeSim outperforming MapCoder.
