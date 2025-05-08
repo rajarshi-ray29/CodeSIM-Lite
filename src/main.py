@@ -59,12 +59,13 @@ parser.add_argument(
 parser.add_argument(
     "--model",
     type=str,
-    default="ChatGPT",
+    default="o3-mini",
 )
 parser.add_argument(
     "--model_provider",
     type=str,
-    default="OpenAI",
+    default="HuggingFace",
+    choices=["OpenAI", "Gemini", "HuggingFace"]
 )
 parser.add_argument(
     "--temperature",
