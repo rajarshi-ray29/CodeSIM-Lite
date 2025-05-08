@@ -3,11 +3,12 @@
 - [Visit our webpage](https://kagnlp.github.io/codesim.github.io/)
 - Visit our paper for more details -->
 
-# CodeSim: Multi-Agent Code Generation and Problem Solving through Simulation-Driven Planning and Debugging
+# CodeSim-Lite: Modernising CodeSIM for Efficient Local Code Generation
+
 
 <p align="center">
-• 👨‍💻 <a href="https://github.com/kagnlp/CodeGenerator" target="_blank">Code</a>
-• 📃 <a href="https://arxiv.org/abs/2502.05664" target="_blank">arXiv</a>
+• 👨‍💻 <a href="https://github.com/rajarshi-ray29/CodeSIM-Lite" target="_blank">Code</a>
+• 📃 <a href="[Report](https://docs.google.com/document/d/1AU-lCgNFXcPZLYMvreJ-HCO48LHOJwlxqYar43o1fRM/edit?usp=sharing)" target="_blank">arXiv</a>
 • 🤗 <a href="https://huggingface.co/papers/2502.05664" target="_blank">Hugging face</a>
 • 📰 <a href="https://paperswithcode.com/paper/codesim-multi-agent-code-generation-and" target="_blank">Papers With Code</a>
 • 🌐 <a href="https://kagnlp.github.io/codesim.github.io/" target="_blank">Website</a>
